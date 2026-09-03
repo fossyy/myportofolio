@@ -12,16 +12,23 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">Burhan</a>
-            <nav>
-                <a href="#profile">Profile</a>
-            </nav>
+    <nav class="site-nav" aria-label="Primary navigation">
+        <div class="site-nav__links">
+            <a class="site-nav__brand" href="#home">BAGAS</a>
+            <a class="site-nav__link" href="#skills">skills</a>
+            <a class="site-nav__link" href="#experience">experience</a>
+            <a class="site-nav__link" href="#projects">projects</a>
+            <a class="site-nav__link" href="#campus-experience">campus</a>
+            <a class="site-nav__link" href="#education">education</a>
+            <a class="site-nav__link" href="#contact">contact</a>
         </div>
-    </header>
+        <div class="site-nav__status">
+            <span class="site-nav__status-indicator" aria-hidden="true"></span>
+            <span>available for collaboration</span>
+        </div>
+    </nav>
 
-    <main>
+    <main id="home">
         <section class="hero" id="profile">
             <div class="container hero-grid">
                 <div class="hero-identity">
