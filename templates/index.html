@@ -11,7 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
+<body class="portfolio-page">
+    <div class="scanline-overlay" aria-hidden="true"></div>
+
     <nav class="site-nav" aria-label="Primary navigation">
         <div class="site-nav__links">
             <a class="site-nav__brand" href="#home">BAGAS</a>
@@ -28,34 +30,76 @@
         </div>
     </nav>
 
-    <main id="home">
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1>Bagas Aulia Rezki</h1>
-                </div>
-                <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="https://cdn.fossy.my.id/public/razan.jpeg" alt="Photo of Burhan">
-                </div>
-                <div class="hero-details">
-                    <p class="bio">CS student at Universitas Indonesia for longer than planned, now a familiar (and slightly dreaded) face among Fasilkom students as a teaching assistant across several courses.</p>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>2506656545</dd>
+    <main class="page-shell" id="home">
+        <section class="portfolio-hero">
+            <div class="portfolio-hero__watermark">
+                <h1 class="portfolio-hero__word" aria-label="Bagas Aulia Rezki">bagas</h1>
+            </div>
+
+            <p class="portfolio-hero__intro">developer / student / self-hoster</p>
+
+            <div class="portfolio-hero__console-area">
+                <div class="portfolio-hero__console">
+                    <div class="portrait-window">
+                        <div class="window-bar">
+                            <span>developer.raw</span>
+                            <span class="window-bar__type">[IMG]</span>
                         </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
+                        <div class="portrait-window__content">
+                            <img
+                                class="portrait-window__image"
+                                src="{% static 'img/me.webp' %}"
+                                alt="Developer portrait"
+                            >
                         </div>
-                    </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/fossyy" class="social-link">GitHub</a>
-                        <a href="https://linkedin.com/in/bagas-aulia-rezki" class="social-link">LinkedIn</a>
-                        <a href="mailto:bagas@fossy.my.id" class="social-link">Email</a>
                     </div>
+
+                    <div class="terminal-window">
+                        <div class="terminal-window__bar">
+                            <div class="terminal-window__controls" aria-hidden="true">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span>terminal</span>
+                        </div>
+                        <div class="terminal-window__body">
+                            <p><span>bagas@portfolio:~$</span> whoami</p>
+                            <p>NAMA: Bagas Aulia Rezki</p>
+                            <p>NPM: 2506656545</p>
+                            <p>fullstack developer</p>
+                            <p>information systems student</p>
+                            <p>building efficient systems</p>
+                            <span class="terminal-cursor blinking-cursor" aria-hidden="true"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portfolio-hero__about">
+                <div class="portfolio-hero__copy">
+                    <p>
+                        I’m a Fullstack Developer and Information Systems student at the University of Indonesia with experience in backend development, infrastructure, automation, and self-hosted systems. I enjoy building efficient, secure, and reliable solutions while continuously learning new technologies.
+                    </p>
+                </div>
+            </div>
+
+            <div class="portfolio-hero__actions">
+                <a class="terminal-action" href="#projects">
+                    <span class="terminal-action__prompt">$</span>
+                    <span>view projects</span>
+                </a>
+                <a class="terminal-action" href="#contact">
+                    <span class="terminal-action__prompt">$</span>
+                    <span>get in touch</span>
+                    <span class="terminal-cursor terminal-cursor--primary blinking-cursor" aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div class="portfolio-hero__scroll">
+                <div class="portfolio-hero__scroll-label">
+                    <span>scroll to inspect</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_downward</span>
                 </div>
             </div>
         </section>
