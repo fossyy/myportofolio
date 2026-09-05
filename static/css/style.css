@@ -525,6 +525,22 @@ a:focus-visible {
     }
 }
 
+.skills-groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.skills-group__title {
+    margin-bottom: var(--space-sm);
+    color: var(--color-on-surface);
+    font-family: var(--font-technical);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.05em;
+}
+
 h1, .brand {
     font-family: "Space Grotesk", -apple-system, sans-serif;
 }
