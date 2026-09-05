@@ -541,6 +541,78 @@ a:focus-visible {
     letter-spacing: 0.05em;
 }
 
+.record-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.record {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.record__meta {
+    flex-shrink: 0;
+    color: var(--color-tertiary);
+    font-family: var(--font-technical);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.record__body {
+    flex-grow: 1;
+}
+
+.record__title {
+    color: var(--color-on-surface);
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 28px;
+}
+
+.record__organization {
+    margin-bottom: var(--space-sm);
+    color: var(--color-secondary);
+    font-family: var(--font-technical);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.record__description {
+    max-width: 512px;
+    margin-bottom: var(--space-md);
+    color: var(--color-on-surface-variant);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 24px;
+}
+
+.record__project {
+    margin-bottom: var(--space-sm);
+    color: var(--color-on-surface);
+    font-family: var(--font-technical);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+}
+
+.record__tags {
+    margin-top: var(--space-md);
+}
+
+@media (min-width: 768px) {
+    .record {
+        flex-direction: row;
+    }
+
+    .record__meta {
+        width: 192px;
+    }
+}
+
 h1, .brand {
     font-family: "Space Grotesk", -apple-system, sans-serif;
 }
