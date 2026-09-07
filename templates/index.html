@@ -2,21 +2,7 @@
 {% load static %}
 
 {% block content %}
-    <nav class="site-nav" aria-label="Primary navigation">
-        <div class="site-nav__links">
-            <a class="site-nav__brand" href="#home">BAGAS</a>
-            <a class="site-nav__link" href="#skills">skills</a>
-            <a class="site-nav__link" href="#experience">experience</a>
-            <a class="site-nav__link" href="#projects">projects</a>
-            <a class="site-nav__link" href="#campus-experience">campus</a>
-            <a class="site-nav__link" href="#education">education</a>
-            <a class="site-nav__link" href="#contact">contact</a>
-        </div>
-        <div class="site-nav__status">
-            <span class="site-nav__status-indicator" aria-hidden="true"></span>
-            <span>available for collaboration</span>
-        </div>
-    </nav>
+    {% include "components/navbar.html" %}
 
     <main class="page-shell" id="home">
         <section class="portfolio-hero">
