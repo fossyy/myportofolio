@@ -1,7 +1,7 @@
 {% load static %}
 <section class="portfolio-hero">
     <div class="portfolio-hero__watermark">
-        <h1 class="portfolio-hero__word" aria-label="Bagas Aulia Rezki">bagas</h1>
+        <h1 class="portfolio-hero__word" aria-label="{{ profile.name }}">{{ profile.short_name }}</h1>
     </div>
 
     <p class="portfolio-hero__intro">developer / student / self-hoster</p>
@@ -33,10 +33,10 @@
                 </div>
                 <div class="terminal-window__body">
                     <p><span>bagas@portfolio:~$</span> whoami</p>
-                    <p>NAMA: Bagas Aulia Rezki</p>
-                    <p>NPM: 2506656545</p>
-                    <p>fullstack developer</p>
-                    <p>information systems student</p>
+                    <p>NAMA: {{ profile.name }}</p>
+                    <p>NPM: {{ profile.npm }}</p>
+                    <p>{{ profile.role }}</p>
+                    <p>{{ profile.study_program }}</p>
                     <p>building efficient systems</p>
                     <span class="terminal-cursor blinking-cursor" aria-hidden="true"></span>
                 </div>
@@ -47,7 +47,7 @@
     <div class="portfolio-hero__about">
         <div class="portfolio-hero__copy">
             <p>
-                I’m a Fullstack Developer and Information Systems student at the University of Indonesia with experience in backend development, infrastructure, automation, and self-hosted systems. I enjoy building efficient, secure, and reliable solutions while continuously learning new technologies.
+                {{ profile.intro }}
             </p>
         </div>
     </div>
