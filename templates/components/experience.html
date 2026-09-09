@@ -6,23 +6,25 @@
 
     <div class="section-content">
         <div class="record-list">
-            <article class="record">
-                <div class="record__meta">Oct 2024 — Apr 2025</div>
-                <div class="record__body">
-                    <h3 class="record__title">Back-end Developer Intern</h3>
-                    <p class="record__organization">PT eBdesk Teknologi</p>
-                    <p class="record__description">
-                        Developed a flexible web-crawling system capable of extracting data from different website structures without requiring a completely new crawler for every website.
-                    </p>
-                    <p class="record__project">Dynamic Web Crawling System</p>
-                    <div class="tag-list record__tags">
-                        <span class="tech-tag">Go</span>
-                        <span class="tech-tag">Tailwind CSS</span>
-                        <span class="tech-tag">Templ</span>
-                        <span class="tech-tag">HTMX</span>
+            {% for experience in experience_list %}
+                <article class="record">
+                    <div class="record__meta">{{ experience.period }}</div>
+                    <div class="record__body">
+                        <h3 class="record__title">{{ experience.title }}</h3>
+                        <p class="record__organization">{{ experience.organization }}</p>
+                        <p class="record__organization">{{ experience.get_category_display }} · {% if experience.is_ongoing %}Ongoing{% else %}Completed{% endif %}</p>
+                        <p class="record__description">{{ experience.description }}</p>
+                        <p class="record__project">{{ experience.project }}</p>
+                        <div class="tag-list record__tags">
+                            {% for tag in experience.tags %}
+                                <span class="tech-tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            </article>
+                </article>
+            {% empty %}
+                <p class="record__description">No experience has been added yet.</p>
+            {% endfor %}
         </div>
     </div>
 </section>

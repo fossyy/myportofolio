@@ -1,11 +1,11 @@
 <nav class="site-nav" aria-label="Primary navigation">
     <div class="site-nav__links">
-        <a class="site-nav__brand" href="#home">BAGAS</a>
-        <a class="site-nav__link" href="#skills">skills</a>
-        <a class="site-nav__link" href="#experience">experience</a>
-        <a class="site-nav__link" href="#projects">projects</a>
-        <a class="site-nav__link" href="#education">education</a>
-        <a class="site-nav__link" href="#contact">contact</a>
+        <a class="site-nav__brand" href="{% url 'main:show_main' %}">BAGAS</a>
+        <a class="site-nav__link" href="{% url 'main:show_main' %}#skills">skills</a>
+        <a class="site-nav__link" href="{% url 'main:show_experience' %}">experience</a>
+        <a class="site-nav__link" href="{% url 'main:show_main' %}#projects">projects</a>
+        <a class="site-nav__link" href="{% url 'main:show_main' %}#education">education</a>
+        <a class="site-nav__link" href="{% url 'main:show_main' %}#contact">contact</a>
     </div>
     <div class="site-nav__status">
         <span class="site-nav__status-indicator" aria-hidden="true"></span>
