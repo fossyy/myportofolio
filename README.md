@@ -32,6 +32,30 @@ venv\Scripts\activate
 
 Setelah server berjalan, buka [http://127.0.0.1:8000](http://127.0.0.1:8000) pada browser.
 
+## Mengelola Konten melalui Admin page
+
+Setelah mengaktifkan virtual environment, terapkan migrasi dan buat akun admin:
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+Buka [Django admin](http://127.0.0.1:8000/admin/) dan masuk menggunakan akun tersebut. Pilih **Projects**, lalu **Add project** untuk mengisi judul dan deskripsi. Source URL dan live URL bersifat opsional; tautan yang kosong tidak ditampilkan. Simpan untuk menampilkan data pada [halaman projects](http://127.0.0.1:8000/projects/). Data dapat diedit atau dihapus melalui admin.
+
+Experience juga dikelola melalui admin dan ditampilkan pada [halaman experience](http://127.0.0.1:8000/experience/).
+
+## Menjalankan testing
+
+Dengan virtual environment aktif, jalankan:
+
+```bash
+python manage.py makemigrations --check --dry-run
+python manage.py check
+python manage.py test
+```
+
 ## Dokumentasi Progres Mingguan
 
 ### Minggu 1 - Inisialisasi Proyek (31 Agustus 2026)
