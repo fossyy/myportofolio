@@ -48,6 +48,8 @@ Experience juga dikelola melalui admin dan ditampilkan pada [halaman experience]
 
 Technical skills dikelola melalui **Skills** di admin: isi nama, kategori, dan position untuk urutan dalam kategori. Halaman [skills](http://127.0.0.1:8000/skills/) mengelompokkan entri menurut kategori dan dimulai tanpa data contoh.
 
+Education dikelola melalui **Education** di admin: isi kualifikasi, institusi, tahun mulai, dan tahun selesai (kosong untuk pendidikan yang masih berlangsung). Halaman [education](http://127.0.0.1:8000/education/) menampilkan pendidikan terbaru lebih dahulu dan dimulai tanpa data contoh.
+
 ## Menjalankan testing
 
 Dengan virtual environment aktif, jalankan:

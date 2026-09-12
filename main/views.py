@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from main.models import Experience, Project, Skill
+from main.models import Education, Experience, Project, Skill
 
 PORTFOLIO_PROFILE = {
     "name": "Bagas Aulia Rezki",
@@ -44,4 +44,11 @@ def show_skills(request):
     return render(request, "skills.html", {
         "profile": PORTFOLIO_PROFILE,
         "skill_list": Skill.objects.all(),
+    })
+
+
+def show_education(request):
+    return render(request, "education.html", {
+        "profile": PORTFOLIO_PROFILE,
+        "education_list": Education.objects.all(),
     })

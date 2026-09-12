@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
-from main.models import Skill
+from main.models import Education, Skill
 
 
 class SkillPageTest(TestCase):
@@ -39,3 +40,42 @@ class SkillPageTest(TestCase):
         self.assertEqual(str(skill), "Updated skill")
         self.assertEqual(self.client.post(reverse("admin:main_skill_delete", args=[skill.pk]), {"post": "yes"}).status_code, 302)
         self.assertFalse(Skill.objects.exists())
+
+
+class EducationPageTest(TestCase):
+    def test_empty_page_and_template(self):
+        response = self.client.get(reverse("main:show_education"))
+        self.assertContains(response, "No education has been added yet.")
+        self.assertTemplateUsed(response, "education.html")
+        self.assertTemplateUsed(response, "components/navbar.html")
+        self.assertTemplateUsed(response, "components/footer.html")
+
+    def test_records_and_periods(self):
+        Education.objects.create(qualification="Current degree", institution="Test university", start_year=2025)
+        Education.objects.create(qualification="Previous diploma", institution="Test school", start_year=2021, end_year=2024)
+        response = self.client.get(reverse("main:show_education"))
+        for text in ["Current degree", "Test university", "2025 — Present", "Previous diploma", "Test school", "2021 — 2024"]:
+            self.assertContains(response, text)
+        html = response.content.decode()
+        self.assertLess(html.index("Current degree"), html.index("Previous diploma"))
+        self.assertNotContains(response, "No education has been added yet.")
+        home = self.client.get(reverse("main:show_main"))
+        self.assertNotContains(home, 'id="education"')
+        self.assertContains(home, f'href="{reverse("main:show_education")}"')
+
+    def test_reversed_years_are_invalid(self):
+        with self.assertRaises(ValidationError):
+            Education(qualification="Degree", institution="School", start_year=2025, end_year=2024).full_clean()
+
+    def test_admin_can_add_change_and_delete_education(self):
+        self.client.force_login(get_user_model().objects.create_superuser(username="education-admin", password=None))
+        fields = {"qualification": "Admin degree", "institution": "School", "start_year": 2025, "end_year": "", "_save": "Save"}
+        self.assertEqual(self.client.post(reverse("admin:main_education_add"), fields).status_code, 302)
+        education = Education.objects.get()
+        self.assertContains(self.client.get(reverse("admin:main_education_changelist")), "Admin degree")
+        fields["qualification"] = "Updated degree"
+        self.assertEqual(self.client.post(reverse("admin:main_education_change", args=[education.pk]), fields).status_code, 302)
+        education.refresh_from_db()
+        self.assertEqual(str(education), "Updated degree")
+        self.assertEqual(self.client.post(reverse("admin:main_education_delete", args=[education.pk]), {"post": "yes"}).status_code, 302)
+        self.assertFalse(Education.objects.exists())
