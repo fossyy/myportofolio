@@ -46,6 +46,8 @@ Buka [Django admin](http://127.0.0.1:8000/admin/) dan masuk menggunakan akun ter
 
 Experience juga dikelola melalui admin dan ditampilkan pada [halaman experience](http://127.0.0.1:8000/experience/).
 
+Technical skills dikelola melalui **Skills** di admin: isi nama, kategori, dan position untuk urutan dalam kategori. Halaman [skills](http://127.0.0.1:8000/skills/) mengelompokkan entri menurut kategori dan dimulai tanpa data contoh.
+
 ## Menjalankan testing
 
 Dengan virtual environment aktif, jalankan:
