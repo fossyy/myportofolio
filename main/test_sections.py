@@ -79,3 +79,24 @@ class EducationPageTest(TestCase):
         self.assertEqual(str(education), "Updated degree")
         self.assertEqual(self.client.post(reverse("admin:main_education_delete", args=[education.pk]), {"post": "yes"}).status_code, 302)
         self.assertFalse(Education.objects.exists())
+
+
+class SectionNavigationTest(TestCase):
+    def test_bio_buttons_and_section_numbering(self):
+        response = self.client.get(reverse("main:show_main"))
+        html = response.content.decode()
+        actions = html.split('aria-label="Portfolio sections">', 1)[1].split("</nav>", 1)[0]
+        self.assertLess(html.index('class="portfolio-hero__copy"'), html.index('aria-label="Portfolio sections"'))
+        self.assertEqual(actions.count('class="terminal-action"'), 5)
+        for number, section in enumerate(["skills", "experience", "projects", "education", "contact"], 1):
+            with self.subTest(section=section):
+                href = "#contact" if section == "contact" else reverse(f"main:show_{section}")
+                self.assertIn(f'href="{href}"', actions)
+                self.assertIn(f'prompt">{number:02d}</span>', actions)
+                page = response if section == "contact" else self.client.get(href)
+                self.assertContains(page, f'class="section-number">{number:02d}</span>')
+        self.assertContains(response, 'id="contact"')
+        self.assertNotContains(response, 'id="skills"')
+        self.assertNotContains(response, 'id="education"')
+        self.assertNotContains(response, "scroll to inspect")
+        self.assertNotContains(response, 'href="#projects"')

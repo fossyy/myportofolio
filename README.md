@@ -50,6 +50,8 @@ Technical skills dikelola melalui **Skills** di admin: isi nama, kategori, dan p
 
 Education dikelola melalui **Education** di admin: isi kualifikasi, institusi, tahun mulai, dan tahun selesai (kosong untuk pendidikan yang masih berlangsung). Halaman [education](http://127.0.0.1:8000/education/) menampilkan pendidikan terbaru lebih dahulu dan dimulai tanpa data contoh.
 
+Tombol di bawah bio mengikuti nomor bagian: 01 Skills, 02 Experience, 03 Projects, 04 Education, dan 05 Contact. Contact tetap berada di halaman utama.
+
 ## Menjalankan testing
 
 Dengan virtual environment aktif, jalankan:
