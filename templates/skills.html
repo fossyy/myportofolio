@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Technical Skills - {{ profile.name }}{% endblock %}
+
+{% block content %}
+    {% include "components/navbar.html" %}
+    <main class="page-shell" id="skills-page">
+        {% include "components/skills.html" %}
+    </main>
+    {% include "components/footer.html" %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Education - {{ profile.name }}{% endblock %}
+
+{% block content %}
+    {% include "components/navbar.html" %}
+    <main class="page-shell" id="education-page">
+        {% include "components/education.html" %}
+    </main>
+    {% include "components/footer.html" %}
+{% endblock %}

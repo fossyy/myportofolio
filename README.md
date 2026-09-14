@@ -3,11 +3,6 @@ Name : Bagas Aulia Rezki
 NPM : 2506656545
 
 Class : PBP E
-Name : Bagas Aulia Rezki
-
-NPM : 2506656545
-
-Class : PBP E
 
 ## Deskripsi
 Personal website untuk tugas PBP yang terinspirasi dari website portofolio [mas fossy](https://fossy.my.id)
@@ -32,6 +27,36 @@ venv\Scripts\activate
 
 Setelah server berjalan, buka [http://127.0.0.1:8000](http://127.0.0.1:8000) pada browser.
 
+## Mengelola Konten melalui Admin page
+
+Setelah mengaktifkan virtual environment, terapkan migrasi dan buat akun admin:
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+Buka [Django admin](http://127.0.0.1:8000/admin/) dan masuk menggunakan akun tersebut. Pilih **Projects**, lalu **Add project** untuk mengisi judul dan deskripsi. Source URL dan live URL bersifat opsional; tautan yang kosong tidak ditampilkan. Simpan untuk menampilkan data pada [halaman projects](http://127.0.0.1:8000/projects/). Data dapat diedit atau dihapus melalui admin.
+
+Experience juga dikelola melalui admin dan ditampilkan pada [halaman experience](http://127.0.0.1:8000/experience/).
+
+Technical skills dikelola melalui **Skills** di admin: isi nama, kategori, dan position untuk urutan dalam kategori. Halaman [skills](http://127.0.0.1:8000/skills/) mengelompokkan entri menurut kategori dan dimulai tanpa data contoh.
+
+Education dikelola melalui **Education** di admin: isi kualifikasi, institusi, tahun mulai, dan tahun selesai (kosong untuk pendidikan yang masih berlangsung). Halaman [education](http://127.0.0.1:8000/education/) menampilkan pendidikan terbaru lebih dahulu dan dimulai tanpa data contoh.
+
+Tombol di bawah bio mengikuti nomor bagian: 01 Skills, 02 Experience, 03 Projects, 04 Education, dan 05 Contact. Contact tetap berada di halaman utama.
+
+## Menjalankan testing
+
+Dengan virtual environment aktif, jalankan:
+
+```bash
+python manage.py makemigrations --check --dry-run
+python manage.py check
+python manage.py test
+```
+
 ## Dokumentasi Progres Mingguan
 
 ### Minggu 1 - Inisialisasi Proyek (31 Agustus 2026)
@@ -54,6 +79,15 @@ Setelah server berjalan, buka [http://127.0.0.1:8000](http://127.0.0.1:8000) pad
 - Membuat base template dan memecah navbar, hero, skills, experience, projects, education, contact, serta footer menjadi komponen template terpisah (`cc4b8e9`–`1f6c71e`).
 - Menghapus tautan navigasi campus yang sudah tidak digunakan (`d3b0e47`).
 - Menormalkan nomor bagian agar berurutan dari `01` sampai `05` (`d96d24f`).
+
+### Minggu 4 - Portofolio Dinamis dan Pengelolaan Admin (9–13 September 2026)
+
+- Menambahkan aplikasi main, model Experience, migrasi, dan halaman experience berbasis database (`b5c3541`).
+- Menghapus seeding otomatis agar konten dikelola melalui admin (`27ac989`).
+- Menambahkan model Project, migrasi, dan registrasi admin, serta halaman projects terpisah dengan kondisi kosong (`8f213e3`, `c26bb85`).
+- Menambahkan pengujian halaman projects dan dokumentasi pengelolaan konten melalui admin (`dbff316`).
+- Memindahkan technical skills dan education ke halaman terpisah, masing-masing dengan model, migrasi, admin, dan pengujian (`252f07f`, `e64a90e`).
+- Menambahkan tombol navigasi bernomor `01`–`05` di bawah bio, menghapus "scroll to inspect", dan mempertahankan contact di halaman utama (`39916c9`).
 
 ## AI disclosure
 
@@ -103,3 +137,17 @@ Saya sendiri menggunakan ai harness (opencode) dengan model Qwen 3.7 dalam penge
 3. **Keterbatasan Web Statis**
 
    Konten masih harus diperbarui langsung melalui kode dan belum memiliki interaksi atau pengelolaan data. Pada iterasi berikutnya, saya ingin menambahkan data api call, admin panel, dan formulir kontak yang tersimpan di database.
+
+## Refleksi Tutorial 2 dan Tugas Individu 2
+
+1. **Alur Request dan Tampilan Data**
+
+   Ketika pengguna membuka `/projects/`, `portofolio/urls.py` meneruskan pencocokan URL ke `main/urls.py`, yang memanggil view `show_projects`. View mengambil data database melalui model `Project`, yang mendefinisikan struktur data, lalu memasukkannya ke context. Template menampilkan objek dengan perulangan atau pesan jika kosong. Django mengirimkan hasil HTML untuk ditampilkan browser.
+
+2. **Penyimpanan Data melalui Model**
+
+   Saya menggunakan model agar data terpisah dari view dan bisa dikelola melalui admin panel tanpa mengedit HTML secara langsung. Pemeliharaan lebih mudah karena perubahan konten tidak memerlukan perubahan template. Data yang sama juga dapat digunakan untuk pengembangan fitur pencarian, filter, atau API.
+
+3. **Makemigrations dan Migrate**
+
+   `makemigrations` membuat berkas migrasi dari perubahan struktur model, sedangkan `migrate` menerapkannya ke database. Contohnya, setelah menambahkan field `repository_url = models.URLField(blank=True)` pada model `Skill`, saya menjalankan `python manage.py makemigrations main` lalu `python manage.py migrate` agar kolom baru tersedia di database.

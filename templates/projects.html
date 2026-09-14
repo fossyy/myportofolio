@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
+{% block title %}Projects - {{ profile.name }}{% endblock %}
+
 {% block content %}
     {% include "components/navbar.html" %}
 
-    <main class="page-shell" id="home">
-        {% include "components/hero.html" %}
-
-        {% include "components/contact.html" %}
+    <main class="page-shell" id="projects-page">
+        {% include "components/projects.html" %}
     </main>
 
     {% include "components/footer.html" %}

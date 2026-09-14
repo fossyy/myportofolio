@@ -3,24 +3,19 @@
         <span class="section-number">04</span>
         <h2 class="section-title">education</h2>
     </div>
-
     <div class="section-content">
         <div class="record-list">
-            <article class="record">
-                <div class="record__meta">2025 — Present</div>
-                <div class="record__body">
-                    <h3 class="record__title">Bachelor of Information Systems</h3>
-                    <p class="record__organization">University of Indonesia</p>
-                </div>
-            </article>
-
-            <article class="record">
-                <div class="record__meta">2021 — 2024</div>
-                <div class="record__body">
-                    <h3 class="record__title">Pengembangan Perangkat Lunak dan Gim — PPLG</h3>
-                    <p class="record__organization">SMKN 2 GUGUAK</p>
-                </div>
-            </article>
+            {% for education in education_list %}
+                <article class="record">
+                    <div class="record__meta">{{ education.period }}</div>
+                    <div class="record__body">
+                        <h3 class="record__title">{{ education.qualification }}</h3>
+                        <p class="record__organization">{{ education.institution }}</p>
+                    </div>
+                </article>
+            {% empty %}
+                <p class="record__description">No education has been added yet.</p>
+            {% endfor %}
         </div>
     </div>
 </section>
