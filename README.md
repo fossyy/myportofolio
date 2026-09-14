@@ -3,11 +3,6 @@ Name : Bagas Aulia Rezki
 NPM : 2506656545
 
 Class : PBP E
-Name : Bagas Aulia Rezki
-
-NPM : 2506656545
-
-Class : PBP E
 
 ## Deskripsi
 Personal website untuk tugas PBP yang terinspirasi dari website portofolio [mas fossy](https://fossy.my.id)
@@ -85,6 +80,15 @@ python manage.py test
 - Menghapus tautan navigasi campus yang sudah tidak digunakan (`d3b0e47`).
 - Menormalkan nomor bagian agar berurutan dari `01` sampai `05` (`d96d24f`).
 
+### Minggu 4 - Portofolio Dinamis dan Pengelolaan Admin (9–13 September 2026)
+
+- Menambahkan aplikasi main, model Experience, migrasi, dan halaman experience berbasis database (`b5c3541`).
+- Menghapus seeding otomatis agar konten dikelola melalui admin (`27ac989`).
+- Menambahkan model Project, migrasi, dan registrasi admin, serta halaman projects terpisah dengan kondisi kosong (`8f213e3`, `c26bb85`).
+- Menambahkan pengujian halaman projects dan dokumentasi pengelolaan konten melalui admin (`dbff316`).
+- Memindahkan technical skills dan education ke halaman terpisah, masing-masing dengan model, migrasi, admin, dan pengujian (`252f07f`, `e64a90e`).
+- Menambahkan tombol navigasi bernomor `01`–`05` di bawah bio, menghapus "scroll to inspect", dan mempertahankan contact di halaman utama (`39916c9`).
+
 ## AI disclosure
 
 Saya menggunakan AI Pada proses pembuatan website portofolio ini, saya sendiri sebenarnya sudah mempunyai website portofolio di [fossy.my.id](https://fossy.my.id) dan saya mengambil sebagian besar design saya dari sana, dan pada website tersebut saya menggunakan tailwindcss sedangkan pada tugas kali ini saya di minta untuk menggunakan vanilla css, jadi saya menggunakan AI untuk mengkonversi beberapa syntax tailwindcss ke vanila css, saya paham ketidak sempurnaan AI pada proses critical thinking jadi saya tidak semana-mena memberikan codebase ini ke AI, Saya melakukan proses cherry pick dalam memilah output dari AI.
@@ -133,3 +137,17 @@ Saya sendiri menggunakan ai harness (opencode) dengan model Qwen 3.7 dalam penge
 3. **Keterbatasan Web Statis**
 
    Konten masih harus diperbarui langsung melalui kode dan belum memiliki interaksi atau pengelolaan data. Pada iterasi berikutnya, saya ingin menambahkan data api call, admin panel, dan formulir kontak yang tersimpan di database.
+
+## Refleksi Tutorial 2 dan Tugas Individu 2
+
+1. **Alur Request dan Tampilan Data**
+
+   Ketika pengguna membuka `/projects/`, `portofolio/urls.py` meneruskan pencocokan URL ke `main/urls.py`, yang memanggil view `show_projects`. View mengambil data database melalui model `Project`, yang mendefinisikan struktur data, lalu memasukkannya ke context. Template menampilkan objek dengan perulangan atau pesan jika kosong. Django mengirimkan hasil HTML untuk ditampilkan browser.
+
+2. **Penyimpanan Data melalui Model**
+
+   Saya menggunakan model agar data terpisah dari view dan bisa dikelola melalui admin panel tanpa mengedit HTML secara langsung. Pemeliharaan lebih mudah karena perubahan konten tidak memerlukan perubahan template. Data yang sama juga dapat digunakan untuk pengembangan fitur pencarian, filter, atau API.
+
+3. **Makemigrations dan Migrate**
+
+   `makemigrations` membuat berkas migrasi dari perubahan struktur model, sedangkan `migrate` menerapkannya ke database. Contohnya, setelah menambahkan field `repository_url = models.URLField(blank=True)` pada model `Skill`, saya menjalankan `python manage.py makemigrations main` lalu `python manage.py migrate` agar kolom baru tersedia di database.
