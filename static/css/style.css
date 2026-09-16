@@ -648,6 +648,14 @@ a:focus-visible {
     text-decoration: none;
 }
 
+.project-link--button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
 .project-link:hover {
     text-decoration: underline;
 }
@@ -1012,4 +1020,72 @@ h1, .brand {
     .social-links {
         justify-content: flex-start;
     }
+}
+
+.project-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.project-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.project-form__field label {
+    color: var(--color-on-surface);
+    font-family: var(--font-technical);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.project-form__field input,
+.project-form__field textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-on-surface);
+    background: var(--color-surface-container);
+    border: 1px solid var(--color-outline);
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 24px;
+    outline: none;
+    transition: border-color 150ms ease,
+                background-color 150ms ease;
+}
+
+.project-form__field textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.project-form__field input:focus,
+.project-form__field textarea:focus {
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+}
+
+.project-form__error {
+    color: var(--color-primary);
+    font-family: var(--font-technical);
+    font-size: 12px;
+    line-height: 16px;
+}
+
+.project-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-outline);
+}
+
+.project-form__actions .terminal-action {
+    cursor: pointer;
 }

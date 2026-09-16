@@ -2,6 +2,10 @@
     <div class="section-heading">
         <span class="section-number">03</span>
         <h2 class="section-title">selected projects</h2>
+
+        <a href="/projects/add" class="project-link project-link--source">
+            [ + add_project ]
+        </a>
     </div>
 
     <div class="section-content">
@@ -13,19 +17,40 @@
                         <h3 class="project-row__title">{{ project.title }}</h3>
                         <p class="project-row__description">{{ project.description }}</p>
                     </div>
-                    {% if project.source_url or project.live_url %}
-                        <div class="project-row__links">
-                            {% if project.source_url %}
-                                <a class="project-link project-link--source" href="{{ project.source_url }}" target="_blank" rel="noopener noreferrer">[ inspect_source ]</a>
-                            {% endif %}
-                            {% if project.live_url %}
-                                <a class="project-link project-link--live" href="{{ project.live_url }}" target="_blank" rel="noopener noreferrer">[ view_live ]</a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
+
+                    <div class="project-row__links">
+                        {% if project.source_url %}
+                            <a class="project-link project-link--source"
+                               href="{{ project.source_url }}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                [ inspect_source ]
+                            </a>
+                        {% endif %}
+
+                        {% if project.live_url %}
+                            <a class="project-link project-link--live"
+                               href="{{ project.live_url }}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                [ view_live ]
+                            </a>
+                        {% endif %}
+
+                        <form method="post"
+                              action="{% url 'main:delete_project' project.pk %}"
+                              class="project-row__delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="project-link project-link--source project-link--button">
+                                [ delete_project ]
+                            </button>
+                        </form>
+                    </div>
                 </article>
             {% empty %}
-                <p class="project-row__description">No projects have been added yet.</p>
+                <p class="project-row__description">
+                    No projects have been added yet.
+                </p>
             {% endfor %}
         </div>
     </div>

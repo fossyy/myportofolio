@@ -34,6 +34,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "bagas-aulia-myportofolio.pws.cs.ui.ac.id"]
 
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+BASIC_AUTH_USERNAME = os.getenv('BASIC_AUTH_USERNAME', '')
+BASIC_AUTH_PASSWORD = os.getenv('BASIC_AUTH_PASSWORD', '')
 
 # Database configuration
 if PRODUCTION:
