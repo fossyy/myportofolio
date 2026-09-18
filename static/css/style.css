@@ -157,6 +157,16 @@ a:focus-visible {
     line-height: 16px;
 }
 
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.skill-delete-form {
+    display: inline;
+}
+
 .scanline-overlay {
     position: fixed;
     inset: 0;

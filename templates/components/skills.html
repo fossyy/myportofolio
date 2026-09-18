@@ -3,6 +3,10 @@
     <div class="section-heading">
         <span class="section-number">01</span>
         <h2 class="section-title">technical skills</h2>
+
+        <a href="{% url 'main:create_skill' %}" class="project-link project-link--source">
+            [ + add_skill ]
+        </a>
     </div>
     <div class="section-content">
         <div class="skills-groups">
@@ -12,7 +16,17 @@
                     <h3 class="skills-group__title">{{ group.grouper }}</h3>
                     <div class="tag-list">
                         {% for skill in group.list %}
-                            <span class="tech-tag">{{ skill.name }}</span>
+                            <div class="skill-tag">
+                                <span class="tech-tag">{{ skill.name }}</span>
+                                <form method="post"
+                                      action="{% url 'main:delete_skill' skill.pk %}"
+                                      class="skill-delete-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="project-link project-link--source project-link--button">
+                                        [ delete ]
+                                    </button>
+                                </form>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
