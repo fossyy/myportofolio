@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Add Education - {{ name }}{% endblock %}
+
+{% block content %}
+<main class="portfolio-page">
+    <section class="portfolio-section">
+        <div class="section-heading">
+            <span class="section-number">04.</span>
+            <h1 class="section-title">Add Education</h1>
+        </div>
+
+        <div class="section-content">
+            <form method="post"
+                  action="{% url 'main:create_education' %}"
+                  class="project-form">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    <div class="project-form__field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <p class="project-form__error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="project-form__actions">
+                    <button type="submit" class="terminal-action">
+                        <span class="terminal-action__prompt">$</span>
+                        tambah_education
+                    </button>
+
+                    <a href="{% url 'main:show_education' %}" class="terminal-action">
+                        <span class="terminal-action__prompt">$</span>
+                        batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+{% endblock %}

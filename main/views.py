@@ -10,7 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods
 
-from main.forms import ExperienceForm, ProjectForm, SkillForm
+from main.forms import EducationForm, ExperienceForm, ProjectForm, SkillForm
 from main.models import Education, Experience, Project, Skill
 
 PORTFOLIO_PROFILE = {
@@ -185,6 +185,32 @@ def show_education(request):
         "profile": PORTFOLIO_PROFILE,
         "education_list": Education.objects.all(),
     })
+
+
+@basic_auth_required
+def create_education(request):
+    form = EducationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Education baru berhasil ditambahkan!")
+        return redirect("main:show_education")
+
+    return render(request, "education_form.html", {
+        "name": PORTFOLIO_PROFILE["name"],
+        "form": form,
+    })
+
+
+@basic_auth_required
+def delete_education(request, education_id):
+    education = get_object_or_404(Education, pk=education_id)
+
+    if request.method == "POST":
+        education.delete()
+        messages.success(request, "Education berhasil dihapus!")
+
+    return redirect("main:show_education")
 
 @basic_auth_required
 def create_project(request):

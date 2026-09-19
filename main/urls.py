@@ -2,9 +2,11 @@ from django.urls import path
 
 from main.views import (
     create_experience,
+    create_education,
     create_project,
     create_skill,
     delete_experience,
+    delete_education,
     delete_project,
     delete_skill,
     project_api,
@@ -22,6 +24,8 @@ urlpatterns = [
     path("experience/", show_experience, name="show_experience"),
     path("experience/add/", create_experience, name="create_experience"),
     path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
+    path("education/add/", create_education, name="create_education"),
+    path("education/<int:education_id>/delete/", delete_education, name="delete_education"),
     path("skills/add/", create_skill, name="create_skill"),
     path("skills/<int:skill_id>/delete/", delete_skill, name="delete_skill"),
     path("projects/", show_projects, name="show_projects"),
