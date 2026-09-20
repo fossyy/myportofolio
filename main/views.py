@@ -130,6 +130,24 @@ def project_api(request, title=None):
     return HttpResponse(project_json, content_type="application/json")
 
 
+@require_http_methods(["GET"])
+def experience_api(request):
+    experiences_json = serializers.serialize("json", Experience.objects.all())
+    return HttpResponse(experiences_json, content_type="application/json")
+
+
+@require_http_methods(["GET"])
+def skill_api(request):
+    skills_json = serializers.serialize("json", Skill.objects.all())
+    return HttpResponse(skills_json, content_type="application/json")
+
+
+@require_http_methods(["GET"])
+def education_api(request):
+    education_json = serializers.serialize("json", Education.objects.all())
+    return HttpResponse(education_json, content_type="application/json")
+
+
 @basic_auth_required
 def delete_project_api(request, project):
     project.delete()
