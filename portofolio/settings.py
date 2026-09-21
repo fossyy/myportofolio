@@ -37,6 +37,15 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 BASIC_AUTH_USERNAME = os.getenv('BASIC_AUTH_USERNAME', '')
 BASIC_AUTH_PASSWORD = os.getenv('BASIC_AUTH_PASSWORD', '')
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://bagas-aulia-myportofolio.pws.cs.ui.ac.id',
+    'http://127.0.0.1:8000',
+]
+
+CSRF_COOKIE_SECURE = True 
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 # Database configuration
 if PRODUCTION:
     DATABASES = {
