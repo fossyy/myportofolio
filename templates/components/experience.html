@@ -2,6 +2,10 @@
     <div class="section-heading">
         <span class="section-number">02</span>
         <h2 class="section-title">experience</h2>
+
+        <a href="{% url 'main:create_experience' %}" class="project-link project-link--source">
+            [ + add_experience ]
+        </a>
     </div>
 
     <div class="section-content">
@@ -20,6 +24,15 @@
                                 <span class="tech-tag">{{ tag }}</span>
                             {% endfor %}
                         </div>
+
+                        <form method="post"
+                              action="{% url 'main:delete_experience' experience.pk %}"
+                              class="project-row__delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="project-link project-link--source project-link--button">
+                                [ delete_experience ]
+                            </button>
+                        </form>
                     </div>
                 </article>
             {% empty %}

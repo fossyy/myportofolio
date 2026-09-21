@@ -2,6 +2,10 @@
     <div class="section-heading">
         <span class="section-number">04</span>
         <h2 class="section-title">education</h2>
+
+        <a href="{% url 'main:create_education' %}" class="project-link project-link--source">
+            [ + add_education ]
+        </a>
     </div>
     <div class="section-content">
         <div class="record-list">
@@ -11,6 +15,15 @@
                     <div class="record__body">
                         <h3 class="record__title">{{ education.qualification }}</h3>
                         <p class="record__organization">{{ education.institution }}</p>
+
+                        <form method="post"
+                              action="{% url 'main:delete_education' education.pk %}"
+                              class="project-row__delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="project-link project-link--source project-link--button">
+                                [ delete_education ]
+                            </button>
+                        </form>
                     </div>
                 </article>
             {% empty %}

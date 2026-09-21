@@ -157,6 +157,16 @@ a:focus-visible {
     line-height: 16px;
 }
 
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.skill-delete-form {
+    display: inline;
+}
+
 .scanline-overlay {
     position: fixed;
     inset: 0;
@@ -1045,7 +1055,8 @@ h1, .brand {
 }
 
 .project-form__field input,
-.project-form__field textarea {
+.project-form__field textarea,
+.project-form__field select {
     width: 100%;
     padding: var(--space-sm) var(--space-md);
     color: var(--color-on-surface);
@@ -1066,7 +1077,8 @@ h1, .brand {
 }
 
 .project-form__field input:focus,
-.project-form__field textarea:focus {
+.project-form__field textarea:focus,
+.project-form__field select:focus {
     border-color: var(--color-primary);
     background: var(--color-surface);
 }
