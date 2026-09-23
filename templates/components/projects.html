@@ -3,9 +3,9 @@
         <span class="section-number">03</span>
         <h2 class="section-title">selected projects</h2>
 
-        <a href="/projects/add" class="project-link project-link--source">
-            [ + add_project ]
-        </a>
+        {% if user.is_superuser %}
+            <a href="{% url 'main:create_project' %}" class="project-link project-link--source">[ + add_project ]</a>
+        {% endif %}
     </div>
 
     <div class="section-content">
@@ -19,6 +19,13 @@
                     </div>
 
                     <div class="project-row__links">
+                        <form method="post" action="{% url 'main:toggle_star' project.pk %}" class="star-form">
+                            {% csrf_token %}
+                            <button type="submit" class="button-star{% if user in project.starred_by.all %} is-starred{% endif %}">
+                                ★ {% if user in project.starred_by.all %}Unstar{% else %}Star{% endif %}
+                                <span class="star-count">{{ project.starred_by.count }}</span>
+                            </button>
+                        </form>
                         {% if project.source_url %}
                             <a class="project-link project-link--source"
                                href="{{ project.source_url }}"
@@ -37,14 +44,14 @@
                             </a>
                         {% endif %}
 
-                        <form method="post"
+                        {% if user.is_superuser %}<form method="post"
                               action="{% url 'main:delete_project' project.pk %}"
                               class="project-row__delete-form">
                             {% csrf_token %}
                             <button type="submit" class="project-link project-link--source project-link--button">
                                 [ delete_project ]
                             </button>
-                        </form>
+                        </form>{% endif %}
                     </div>
                 </article>
             {% empty %}

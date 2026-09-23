@@ -7,6 +7,15 @@
         <a class="site-nav__link" href="{% url 'main:show_education' %}">education</a>
         <a class="site-nav__link" href="{% url 'main:show_main' %}#contact">contact</a>
     </div>
+    <div class="site-nav__auth">
+        {% if user.is_authenticated %}
+            <span class="nav-user">{{ user.username }}</span>
+            <a class="site-nav__link" href="{% url 'main:logout' %}">logout</a>
+        {% else %}
+            <a class="site-nav__link" href="{% url 'main:login' %}">login</a>
+            <a class="site-nav__link" href="{% url 'main:register' %}">register</a>
+        {% endif %}
+    </div>
     <div class="site-nav__status">
         <span class="site-nav__status-indicator" aria-hidden="true"></span>
         <span>available for collaboration</span>

@@ -2,6 +2,7 @@ import uuid
 from datetime import date
 
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -46,6 +47,7 @@ class Project(models.Model):
     description = models.TextField()
     source_url = models.URLField(blank=True)
     live_url = models.URLField(blank=True)
+    starred_by = models.ManyToManyField(User, related_name="starred_projects", blank=True)
 
     class Meta:
         ordering = ["pk"]

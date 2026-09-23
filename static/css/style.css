@@ -271,6 +271,14 @@ a:focus-visible {
     line-height: 16px;
 }
 
+.site-nav__auth { display: flex; flex-shrink: 0; align-items: center; }
+.nav-user { padding: 0 var(--space-md); font-family: var(--font-technical); font-size: 12px; }
+.star-form { display: inline; }
+.button-star { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .6rem; color: var(--color-on-surface); background: var(--color-surface-container); border: 1px solid var(--color-outline); cursor: pointer; }
+.button-star.is-starred { color: var(--color-primary); }
+.star-count { padding: .05rem .4rem; border-radius: 999px; background: var(--color-surface-high); font-size: .8rem; }
+.form-help { color: var(--color-tertiary); font-size: 12px; }
+
 .site-nav__status-indicator {
     position: relative;
     display: block;
@@ -282,7 +290,7 @@ a:focus-visible {
 }
 
 @media (max-width: 767px) {
-    .site-nav__link {
+    .site-nav__links > .site-nav__link {
         display: none;
     }
 }

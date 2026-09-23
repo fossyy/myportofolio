@@ -18,11 +18,16 @@ from main.views import (
     show_main,
     show_projects,
     show_skills,
+    register, login_user, logout_user, toggle_star,
 )
 
 app_name = "main"
 
 urlpatterns = [
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+    path("projects/<int:project_id>/star/", toggle_star, name="toggle_star"),
     path("", show_main, name="show_main"),
     path("experience/", show_experience, name="show_experience"),
     path("experience/add/", create_experience, name="create_experience"),
