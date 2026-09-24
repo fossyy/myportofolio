@@ -4,9 +4,9 @@
         <span class="section-number">01</span>
         <h2 class="section-title">technical skills</h2>
 
-        <a href="{% url 'main:create_skill' %}" class="project-link project-link--source">
-            [ + add_skill ]
-        </a>
+        {% if is_portfolio_owner %}
+            <a href="{% url 'main:create_skill' %}" class="project-link project-link--source">[ + add_skill ]</a>
+        {% endif %}
     </div>
     <div class="section-content">
         <div class="skills-groups">
@@ -18,14 +18,14 @@
                         {% for skill in group.list %}
                             <div class="skill-tag">
                                 <span class="tech-tag">{{ skill.name }}</span>
-                                <form method="post"
+                                {% if is_portfolio_owner %}<form method="post"
                                       action="{% url 'main:delete_skill' skill.pk %}"
                                       class="skill-delete-form">
                                     {% csrf_token %}
                                     <button type="submit" class="project-link project-link--source project-link--button">
                                         [ delete ]
                                     </button>
-                                </form>
+                                </form>{% endif %}
                             </div>
                         {% endfor %}
                     </div>

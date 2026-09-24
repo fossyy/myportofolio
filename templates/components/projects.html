@@ -3,7 +3,7 @@
         <span class="section-number">03</span>
         <h2 class="section-title">selected projects</h2>
 
-        {% if user.is_superuser %}
+        {% if is_portfolio_owner %}
             <a href="{% url 'main:create_project' %}" class="project-link project-link--source">[ + add_project ]</a>
         {% endif %}
     </div>
@@ -44,7 +44,7 @@
                             </a>
                         {% endif %}
 
-                        {% if user.is_superuser %}<form method="post"
+                        {% if is_portfolio_owner %}<form method="post"
                               action="{% url 'main:delete_project' project.pk %}"
                               class="project-row__delete-form">
                             {% csrf_token %}

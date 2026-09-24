@@ -1,7 +1,7 @@
 from datetime import date
-import base64
+from django.contrib.auth import get_user_model
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from main.models import Experience, Project
@@ -72,10 +72,6 @@ class MainTest(TestCase):
 
 
 class ProjectPageTest(TestCase):
-    def basic_auth_headers(self):
-        credentials = base64.b64encode(b"project-admin:project-password").decode()
-        return {"HTTP_AUTHORIZATION": f"Basic {credentials}"}
-
     def test_projects_url_uses_shared_templates(self):
         response = self.client.get(reverse("main:show_projects"))
 
@@ -168,39 +164,49 @@ class ProjectPageTest(TestCase):
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()[0]["pk"], project.pk)
+        self.assertNotIn("starred_by", response.json()[0]["fields"])
 
-        with override_settings(
-            BASIC_AUTH_USERNAME="project-admin",
-            BASIC_AUTH_PASSWORD="project-password",
-        ):
-            response = self.client.delete(detail_url, **self.basic_auth_headers())
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Project.objects.filter(pk=project.pk).exists())
+
+        regular_user = get_user_model().objects.create_user(username="regular", password="pass")
+        self.client.force_login(regular_user)
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Project.objects.filter(pk=project.pk).exists())
+
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
+        response = self.client.delete(detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Project.objects.filter(pk=project.pk).exists())
 
-    @override_settings(
-        BASIC_AUTH_USERNAME="project-admin",
-        BASIC_AUTH_PASSWORD="project-password",
-    )
-    def test_project_mutations_require_basic_auth(self):
+    def test_project_mutations_require_owner_access(self):
         create_url = reverse("main:create_project")
         delete_project = Project.objects.create(title="Protected project", description="Temporary")
         delete_url = reverse("main:delete_project", args=[delete_project.pk])
 
-        self.assertEqual(self.client.post(create_url, {}).status_code, 401)
-        self.assertEqual(self.client.post(delete_url).status_code, 401)
+        guest_response = self.client.post(create_url, {})
+        self.assertEqual(guest_response.status_code, 302)
+        self.assertIn(reverse("main:login"), guest_response.url)
+        self.assertEqual(self.client.post(delete_url).status_code, 302)
 
-        create_response = self.client.post(
-            create_url,
-            {
-                "title": "Authorized project",
-                "description": "Created with basic auth",
-            },
-            **self.basic_auth_headers(),
-        )
+        regular_user = get_user_model().objects.create_user(username="regular", password="pass")
+        self.client.force_login(regular_user)
+        self.assertEqual(self.client.post(create_url, {}).status_code, 403)
+        self.assertEqual(self.client.post(delete_url).status_code, 403)
+
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
+        create_response = self.client.post(create_url, {
+            "title": "Authorized project",
+            "description": "Created by the portfolio owner",
+        })
         self.assertRedirects(create_response, reverse("main:show_projects"))
         self.assertTrue(Project.objects.filter(title="Authorized project").exists())
 
-        delete_response = self.client.post(delete_url, **self.basic_auth_headers())
+        delete_response = self.client.post(delete_url)
         self.assertRedirects(delete_response, reverse("main:show_projects"))
         self.assertFalse(Project.objects.filter(pk=delete_project.pk).exists())
 
@@ -208,20 +214,21 @@ class ProjectPageTest(TestCase):
         project = Project.objects.create(title="Removable project", description="Temporary")
 
         response = self.client.get(reverse("main:show_projects"))
+        self.assertNotContains(response, f'action="{reverse("main:delete_project", args=[project.pk])}"')
+        self.assertNotContains(response, "[ delete_project ]")
 
+        self.client.force_login(get_user_model().objects.create_superuser(username="owner", password="pass"))
+        response = self.client.get(reverse("main:show_projects"))
         self.assertContains(response, f'action="{reverse("main:delete_project", args=[project.pk])}"')
         self.assertContains(response, "[ delete_project ]")
 
-    @override_settings(
-        BASIC_AUTH_USERNAME="project-admin",
-        BASIC_AUTH_PASSWORD="project-password",
-    )
     def test_delete_project_button_removes_project(self):
         project = Project.objects.create(title="Remove from page", description="Temporary")
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
 
         response = self.client.post(
             reverse("main:delete_project", args=[project.pk]),
-            **self.basic_auth_headers(),
         )
 
         self.assertRedirects(response, reverse("main:show_projects"))

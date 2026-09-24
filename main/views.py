@@ -1,10 +1,5 @@
-import base64
-import binascii
-import hmac
 import datetime
-from functools import wraps
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -13,7 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
 from main.forms import EducationForm, ExperienceForm, ProjectForm, SkillForm
 from main.models import Education, Experience, Project, Skill
@@ -34,32 +29,37 @@ PORTFOLIO_PROFILE = {
 }
 
 
-def basic_auth_required(view):
-    @wraps(view)
-    def wrapped_view(request, *args, **kwargs):
-        authorization = request.headers.get("Authorization", "")
-        credentials = authorization.removeprefix("Basic ")
+def can_edit_content(user):
+    return user.is_authenticated and (
+        user.is_superuser or user.groups.filter(name="Editor").exists()
+    )
 
-        try:
-            decoded_credentials = base64.b64decode(credentials, validate=True).decode("utf-8")
-            username, password = decoded_credentials.split(":", 1)
-        except (ValueError, UnicodeDecodeError, binascii.Error):
-            username = password = ""
 
-        valid_credentials = (
-            hmac.compare_digest(username, settings.BASIC_AUTH_USERNAME)
-            and hmac.compare_digest(password, settings.BASIC_AUTH_PASSWORD)
-            and bool(settings.BASIC_AUTH_USERNAME)
-            and bool(settings.BASIC_AUTH_PASSWORD)
-        )
-        if not valid_credentials:
-            response = HttpResponse("Authentication required.", status=401)
-            response["WWW-Authenticate"] = 'Basic realm="Project management"'
-            return response
-
+def owner_required(view):
+    def check_owner(request, *args, **kwargs):
+        if not request.user.is_superuser:
+            raise PermissionDenied
         return view(request, *args, **kwargs)
 
-    return wrapped_view
+    return login_required(check_owner, login_url="/login/")
+
+
+def editor_required(view):
+    def check_editor(request, *args, **kwargs):
+        if not can_edit_content(request.user):
+            raise PermissionDenied
+        return view(request, *args, **kwargs)
+
+    return login_required(check_editor, login_url="/login/")
+
+
+def section_context(request, **context):
+    return {
+        "profile": PORTFOLIO_PROFILE,
+        "can_edit_content": can_edit_content(request.user),
+        "is_portfolio_owner": request.user.is_superuser,
+        **context,
+    }
 
 def show_main(request):
     context = {
@@ -70,14 +70,12 @@ def show_main(request):
 
 
 def show_experience(request):
-    context = {
-        "profile": PORTFOLIO_PROFILE,
-        "experience_list": Experience.objects.all(),
-    }
+    context = section_context(request, experience_list=Experience.objects.all())
     return render(request, "experience.html", context)
 
 
-@basic_auth_required
+@owner_required
+@require_http_methods(["GET", "POST"])
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
 
@@ -93,7 +91,8 @@ def create_experience(request):
     return render(request, "experience_form.html", context)
 
 
-@basic_auth_required
+@owner_required
+@require_POST
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
 
@@ -105,10 +104,7 @@ def delete_experience(request, experience_id):
 
 
 def show_projects(request):
-    context = {
-        "profile": PORTFOLIO_PROFILE,
-        "project_list": Project.objects.all(),
-    }
+    context = section_context(request, project_list=Project.objects.all())
     return render(request, "projects.html", context)
 
 
@@ -119,7 +115,9 @@ def get_projects_json(request):
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    projects_json = serializers.serialize("json", projects)
+    projects_json = serializers.serialize(
+        "json", projects, fields=["title", "description", "source_url", "live_url"]
+    )
     return HttpResponse(projects_json, content_type="application/json")
 
 
@@ -132,7 +130,9 @@ def project_api(request, title=None):
     if request.method == "DELETE":
         return delete_project_api(request, project)
 
-    project_json = serializers.serialize("json", [project])
+    project_json = serializers.serialize(
+        "json", [project], fields=["title", "description", "source_url", "live_url"]
+    )
     return HttpResponse(project_json, content_type="application/json")
 
 
@@ -154,18 +154,15 @@ def education_api(request):
     return HttpResponse(education_json, content_type="application/json")
 
 
-@login_required(login_url="/login/")
+@owner_required
 def delete_project_api(request, project):
-    if not request.user.is_superuser:
-        raise PermissionDenied
     project.delete()
     return JsonResponse({"detail": "Project deleted successfully."})
 
 
-@login_required(login_url="/login/")
+@owner_required
+@require_POST
 def delete_project(request, project_id):
-    if not request.user.is_superuser:
-        raise PermissionDenied
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -176,13 +173,11 @@ def delete_project(request, project_id):
 
 
 def show_skills(request):
-    return render(request, "skills.html", {
-        "profile": PORTFOLIO_PROFILE,
-        "skill_list": Skill.objects.all(),
-    })
+    return render(request, "skills.html", section_context(request, skill_list=Skill.objects.all()))
 
 
-@basic_auth_required
+@owner_required
+@require_http_methods(["GET", "POST"])
 def create_skill(request):
     form = SkillForm(request.POST or None)
 
@@ -197,7 +192,8 @@ def create_skill(request):
     })
 
 
-@basic_auth_required
+@owner_required
+@require_POST
 def delete_skill(request, skill_id):
     skill = get_object_or_404(Skill, pk=skill_id)
 
@@ -209,13 +205,11 @@ def delete_skill(request, skill_id):
 
 
 def show_education(request):
-    return render(request, "education.html", {
-        "profile": PORTFOLIO_PROFILE,
-        "education_list": Education.objects.all(),
-    })
+    return render(request, "education.html", section_context(request, education_list=Education.objects.all()))
 
 
-@basic_auth_required
+@owner_required
+@require_http_methods(["GET", "POST"])
 def create_education(request):
     form = EducationForm(request.POST or None)
 
@@ -230,7 +224,8 @@ def create_education(request):
     })
 
 
-@basic_auth_required
+@owner_required
+@require_POST
 def delete_education(request, education_id):
     education = get_object_or_404(Education, pk=education_id)
 
@@ -240,10 +235,9 @@ def delete_education(request, education_id):
 
     return redirect("main:show_education")
 
-@login_required(login_url="/login/")
+@owner_required
+@require_http_methods(["GET", "POST"])
 def create_project(request):
-    if not request.user.is_superuser:
-        raise PermissionDenied
     form = ProjectForm(request.POST or None)
     
     if request.method == "POST" and form.is_valid():
@@ -293,6 +287,7 @@ def logout_user(request):
 
 
 @login_required(login_url="/login/")
+@require_POST
 def toggle_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     if request.method == "POST":
