@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.exceptions import PermissionDenied
 from django.core import serializers
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -124,6 +124,8 @@ def get_projects_json(request):
 @require_http_methods(["GET", "DELETE"])
 def project_api(request, title=None):
     if title is None:
+        if request.method != "GET":
+            return HttpResponseNotAllowed(["GET"])
         return get_projects_json(request)
 
     project = get_object_or_404(Project, title=title)
