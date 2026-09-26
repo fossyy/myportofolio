@@ -15,6 +15,9 @@
                     <div class="record__body">
                         <h3 class="record__title">{{ education.qualification }}</h3>
                         <p class="record__organization">{{ education.institution }}</p>
+                        {% if can_edit_content %}
+                            <a class="project-link project-link--source" href="{% url 'main:update_education' education.pk %}">[ edit_education ]</a>
+                        {% endif %}
 
                         {% if is_portfolio_owner %}<form method="post"
                               action="{% url 'main:delete_education' education.pk %}"

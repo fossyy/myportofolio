@@ -1,4 +1,5 @@
 import datetime
+from functools import wraps
 
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -8,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
 
 from main.forms import EducationForm, ExperienceForm, ProjectForm, SkillForm
@@ -36,6 +38,7 @@ def can_edit_content(user):
 
 
 def owner_required(view):
+    @wraps(view)
     def check_owner(request, *args, **kwargs):
         if not request.user.is_superuser:
             raise PermissionDenied
@@ -45,6 +48,7 @@ def owner_required(view):
 
 
 def editor_required(view):
+    @wraps(view)
     def check_editor(request, *args, **kwargs):
         if not can_edit_content(request.user):
             raise PermissionDenied
@@ -59,6 +63,17 @@ def section_context(request, **context):
         "can_edit_content": can_edit_content(request.user),
         "is_portfolio_owner": request.user.is_superuser,
         **context,
+    }
+
+
+def model_form_context(form, section_name, action_url, is_edit=False):
+    action = "Edit" if is_edit else "Add"
+    return {
+        "name": PORTFOLIO_PROFILE["name"],
+        "form": form,
+        "form_title": f"{action} {section_name}",
+        "form_action": action_url,
+        "submit_label": f"simpan_{section_name.lower()}" if is_edit else f"tambah_{section_name.lower()}",
     }
 
 def show_main(request):
@@ -85,8 +100,7 @@ def create_experience(request):
         return redirect("main:show_experience")
 
     context = {
-        "name": PORTFOLIO_PROFILE["name"],
-        "form": form,
+        **model_form_context(form, "Experience", reverse("main:create_experience")),
     }
     return render(request, "experience_form.html", context)
 
@@ -101,6 +115,21 @@ def delete_experience(request, experience_id):
         messages.success(request, "Experience berhasil dihapus!")
 
     return redirect("main:show_experience")
+
+
+@editor_required
+@require_http_methods(["GET", "POST"])
+def update_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience berhasil diperbarui!")
+        return redirect("main:show_experience")
+    context = model_form_context(
+        form, "Experience", reverse("main:update_experience", args=[experience.pk]), is_edit=True
+    )
+    return render(request, "experience_form.html", context)
 
 
 def show_projects(request):
@@ -188,10 +217,9 @@ def create_skill(request):
         messages.success(request, "Skill baru berhasil ditambahkan!")
         return redirect("main:show_skills")
 
-    return render(request, "skills_form.html", {
-        "name": PORTFOLIO_PROFILE["name"],
-        "form": form,
-    })
+    return render(request, "skills_form.html", model_form_context(
+        form, "Skill", reverse("main:create_skill")
+    ))
 
 
 @owner_required
@@ -204,6 +232,19 @@ def delete_skill(request, skill_id):
         messages.success(request, "Skill berhasil dihapus!")
 
     return redirect("main:show_skills")
+
+
+@editor_required
+@require_http_methods(["GET", "POST"])
+def update_skill(request, skill_id):
+    skill = get_object_or_404(Skill, pk=skill_id)
+    form = SkillForm(request.POST or None, instance=skill)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Skill berhasil diperbarui!")
+        return redirect("main:show_skills")
+    context = model_form_context(form, "Skill", reverse("main:update_skill", args=[skill.pk]), is_edit=True)
+    return render(request, "skills_form.html", context)
 
 
 def show_education(request):
@@ -220,10 +261,9 @@ def create_education(request):
         messages.success(request, "Education baru berhasil ditambahkan!")
         return redirect("main:show_education")
 
-    return render(request, "education_form.html", {
-        "name": PORTFOLIO_PROFILE["name"],
-        "form": form,
-    })
+    return render(request, "education_form.html", model_form_context(
+        form, "Education", reverse("main:create_education")
+    ))
 
 
 @owner_required
@@ -237,6 +277,21 @@ def delete_education(request, education_id):
 
     return redirect("main:show_education")
 
+
+@editor_required
+@require_http_methods(["GET", "POST"])
+def update_education(request, education_id):
+    education = get_object_or_404(Education, pk=education_id)
+    form = EducationForm(request.POST or None, instance=education)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Education berhasil diperbarui!")
+        return redirect("main:show_education")
+    context = model_form_context(
+        form, "Education", reverse("main:update_education", args=[education.pk]), is_edit=True
+    )
+    return render(request, "education_form.html", context)
+
 @owner_required
 @require_http_methods(["GET", "POST"])
 def create_project(request):
@@ -247,10 +302,22 @@ def create_project(request):
         messages.success(request, "Proyek baru berhasil ditambahkan!")
         return redirect("main:show_projects")
 
-    context = {
-        "name": PORTFOLIO_PROFILE["name"],
-        "form": form,
-    }
+    context = model_form_context(form, "Project", reverse("main:create_project"))
+    return render(request, "projects_form.html", context)
+
+
+@editor_required
+@require_http_methods(["GET", "POST"])
+def update_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    form = ProjectForm(request.POST or None, instance=project)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Proyek berhasil diperbarui!")
+        return redirect("main:show_projects")
+    context = model_form_context(
+        form, "Project", reverse("main:update_project", args=[project.pk]), is_edit=True
+    )
     return render(request, "projects_form.html", context)
 
 
