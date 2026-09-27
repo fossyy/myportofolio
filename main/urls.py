@@ -1,54 +1,12 @@
 from django.urls import path
 
-from main.views import (
-    create_experience,
-    create_education,
-    create_project,
-    create_skill,
-    delete_experience,
-    delete_education,
-    delete_project,
-    delete_skill,
-    education_api,
-    experience_api,
-    project_api,
-    skill_api,
-    show_education,
-    show_experience,
-    show_main,
-    show_projects,
-    show_skills,
-    register, login_user, logout_user, toggle_star,
-    update_education, update_experience, update_project, update_skill,
-)
+from main.views import login_user, logout_user, register, show_main
 
 app_name = "main"
 
 urlpatterns = [
+    path("", show_main, name="show_main"),
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
-    path("projects/<int:project_id>/star/", toggle_star, name="toggle_star"),
-    path("", show_main, name="show_main"),
-    path("experience/", show_experience, name="show_experience"),
-    path("experience/add/", create_experience, name="create_experience"),
-    path("experience/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
-    path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
-    path("education/add/", create_education, name="create_education"),
-    path("education/<int:education_id>/edit/", update_education, name="update_education"),
-    path("education/<int:education_id>/delete/", delete_education, name="delete_education"),
-    path("skills/add/", create_skill, name="create_skill"),
-    path("skills/<int:skill_id>/edit/", update_skill, name="update_skill"),
-    path("skills/<int:skill_id>/delete/", delete_skill, name="delete_skill"),
-    path("projects/", show_projects, name="show_projects"),
-    path("projects/add/", create_project, name="create_project"),
-    path("projects/<int:project_id>/edit/", update_project, name="update_project"),
-    path("projects/<int:project_id>/delete/", delete_project, name="delete_project"),
-    path("api/projects", project_api, name="projects_api"),
-    path("api/projects/<str:title>", project_api, name="project_api"),
-    path("api/experience", experience_api, name="experience_api"),
-    path("api/skills", skill_api, name="skills_api"),
-    path("api/education", education_api, name="education_api"),
-    path("skills/", show_skills, name="show_skills"),
-    path("education/", show_education, name="show_education"),
 ]

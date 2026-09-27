@@ -4,7 +4,7 @@
         <h2 class="section-title">selected projects</h2>
 
         {% if is_portfolio_owner %}
-            <a href="{% url 'main:create_project' %}" class="project-link project-link--source">[ + add_project ]</a>
+            <a href="{% url 'projects:create' %}" class="project-link project-link--source">[ + add_project ]</a>
         {% endif %}
     </div>
 
@@ -20,9 +20,9 @@
 
                     <div class="project-row__links">
                         {% if can_edit_content %}
-                            <a class="project-link project-link--source" href="{% url 'main:update_project' project.pk %}">[ edit_project ]</a>
+                            <a class="project-link project-link--source" href="{% url 'projects:update' project.pk %}">[ edit_project ]</a>
                         {% endif %}
-                        <form method="post" action="{% url 'main:toggle_star' project.pk %}" class="star-form">
+                        <form method="post" action="{% url 'projects:toggle_star' project.pk %}" class="star-form">
                             {% csrf_token %}
                             <button type="submit" class="button-star{% if user in project.starred_by.all %} is-starred{% endif %}">
                                 ★ {% if user in project.starred_by.all %}Unstar{% else %}Star{% endif %}
@@ -48,7 +48,7 @@
                         {% endif %}
 
                         {% if is_portfolio_owner %}<form method="post"
-                              action="{% url 'main:delete_project' project.pk %}"
+                              action="{% url 'projects:delete' project.pk %}"
                               class="project-row__delete-form">
                             {% csrf_token %}
                             <button type="submit" class="project-link project-link--source project-link--button">

@@ -5,7 +5,7 @@
         <h2 class="section-title">technical skills</h2>
 
         {% if is_portfolio_owner %}
-            <a href="{% url 'main:create_skill' %}" class="project-link project-link--source">[ + add_skill ]</a>
+            <a href="{% url 'skills:create' %}" class="project-link project-link--source">[ + add_skill ]</a>
         {% endif %}
     </div>
     <div class="section-content">
@@ -19,10 +19,10 @@
                             <div class="skill-tag">
                                 <span class="tech-tag">{{ skill.name }}</span>
                                 {% if can_edit_content %}
-                                    <a class="project-link project-link--source" href="{% url 'main:update_skill' skill.pk %}">[ edit ]</a>
+                                    <a class="project-link project-link--source" href="{% url 'skills:update' skill.pk %}">[ edit ]</a>
                                 {% endif %}
                                 {% if is_portfolio_owner %}<form method="post"
-                                      action="{% url 'main:delete_skill' skill.pk %}"
+                                      action="{% url 'skills:delete' skill.pk %}"
                                       class="skill-delete-form">
                                     {% csrf_token %}
                                     <button type="submit" class="project-link project-link--source project-link--button">

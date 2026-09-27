@@ -5,10 +5,20 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 
-from main.models import Education, Experience, Project, Skill
+from education.models import Education
+from experiences.models import Experience
+from projects.models import Project
+from skills.models import Skill
 
 
 class PortfolioRoleAccessTest(TestCase):
+    section_apps = {
+        "project": "projects",
+        "experience": "experiences",
+        "skill": "skills",
+        "education": "education",
+    }
+
     def setUp(self):
         self.project = Project.objects.create(title="Project", description="Before")
         self.experience = Experience.objects.create(
@@ -22,10 +32,10 @@ class PortfolioRoleAccessTest(TestCase):
             qualification="Degree", institution="University", start_year=2020
         )
         self.records = [
-            ("project", self.project, reverse("main:update_project", args=[self.project.pk])),
-            ("experience", self.experience, reverse("main:update_experience", args=[self.experience.pk])),
-            ("skill", self.skill, reverse("main:update_skill", args=[self.skill.pk])),
-            ("education", self.education, reverse("main:update_education", args=[self.education.pk])),
+            ("project", self.project, reverse("projects:update", args=[self.project.pk])),
+            ("experience", self.experience, reverse("experiences:update", args=[self.experience.pk])),
+            ("skill", self.skill, reverse("skills:update", args=[self.skill.pk])),
+            ("education", self.education, reverse("education:update", args=[self.education.pk])),
         ]
         self.editor_group = Group.objects.create(name="Editor")
 
@@ -36,10 +46,10 @@ class PortfolioRoleAccessTest(TestCase):
 
     def test_guests_are_redirected_from_update_and_owner_actions(self):
         create_urls = [
-            reverse("main:create_project"),
-            reverse("main:create_experience"),
-            reverse("main:create_skill"),
-            reverse("main:create_education"),
+            reverse("projects:create"),
+            reverse("experiences:create"),
+            reverse("skills:create"),
+            reverse("education:create"),
         ]
         for url in create_urls:
             with self.subTest(create_url=url):
@@ -54,7 +64,7 @@ class PortfolioRoleAccessTest(TestCase):
                 self.assertIn(reverse("main:login"), response.url)
 
         for url_name, record, _ in self.records:
-            delete_url = reverse(f"main:delete_{url_name}", args=[record.pk])
+            delete_url = reverse(f"{self.section_apps[url_name]}:delete", args=[record.pk])
             with self.subTest(delete_url=delete_url):
                 response = self.client.post(delete_url)
                 self.assertEqual(response.status_code, 302)
@@ -68,17 +78,17 @@ class PortfolioRoleAccessTest(TestCase):
                 self.assertEqual(self.client.get(update_url).status_code, 403)
 
         create_urls = [
-            reverse("main:create_project"),
-            reverse("main:create_experience"),
-            reverse("main:create_skill"),
-            reverse("main:create_education"),
+            reverse("projects:create"),
+            reverse("experiences:create"),
+            reverse("skills:create"),
+            reverse("education:create"),
         ]
         for url in create_urls:
             with self.subTest(create_url=url):
                 self.assertEqual(self.client.get(url).status_code, 403)
 
         for section, record, _ in self.records:
-            delete_url = reverse(f"main:delete_{section}", args=[record.pk])
+            delete_url = reverse(f"{self.section_apps[section]}:delete", args=[record.pk])
             with self.subTest(delete_url=delete_url):
                 self.assertEqual(self.client.post(delete_url).status_code, 403)
 
@@ -109,13 +119,8 @@ class PortfolioRoleAccessTest(TestCase):
         for (section, record, update_url), payload in zip(self.records, update_payloads):
             with self.subTest(section=section):
                 response = self.client.post(update_url, payload)
-                show_name = {
-                    "project": "show_projects",
-                    "experience": "show_experience",
-                    "skill": "show_skills",
-                    "education": "show_education",
-                }[section]
-                self.assertRedirects(response, reverse(f"main:{show_name}"))
+                show_route = f"{self.section_apps[section]}:list"
+                self.assertRedirects(response, reverse(show_route))
                 record.refresh_from_db()
                 self.assertIn("Updated", str(record))
 
@@ -123,27 +128,27 @@ class PortfolioRoleAccessTest(TestCase):
         user = self.editor()
         self.client.force_login(user)
         create_urls = [
-            reverse("main:create_project"),
-            reverse("main:create_experience"),
-            reverse("main:create_skill"),
-            reverse("main:create_education"),
+            reverse("projects:create"),
+            reverse("experiences:create"),
+            reverse("skills:create"),
+            reverse("education:create"),
         ]
         for url in create_urls:
             with self.subTest(url=url):
                 self.assertEqual(self.client.get(url).status_code, 403)
 
         for section, record, _ in self.records:
-            delete_url = reverse(f"main:delete_{section}", args=[record.pk])
+            delete_url = reverse(f"{self.section_apps[section]}:delete", args=[record.pk])
             with self.subTest(delete_url=delete_url):
                 self.assertEqual(self.client.post(delete_url).status_code, 403)
                 self.assertTrue(record.__class__.objects.filter(pk=record.pk).exists())
 
     def test_public_pages_show_edit_links_only_to_editors_and_owner(self):
         page_urls = [
-            ("project", reverse("main:show_projects"), reverse("main:update_project", args=[self.project.pk])),
-            ("experience", reverse("main:show_experience"), reverse("main:update_experience", args=[self.experience.pk])),
-            ("skill", reverse("main:show_skills"), reverse("main:update_skill", args=[self.skill.pk])),
-            ("education", reverse("main:show_education"), reverse("main:update_education", args=[self.education.pk])),
+            ("project", reverse("projects:list"), reverse("projects:update", args=[self.project.pk])),
+            ("experience", reverse("experiences:list"), reverse("experiences:update", args=[self.experience.pk])),
+            ("skill", reverse("skills:list"), reverse("skills:update", args=[self.skill.pk])),
+            ("education", reverse("education:list"), reverse("education:update", args=[self.education.pk])),
         ]
         for _, page_url, edit_url in page_urls:
             with self.subTest(page_url=page_url):
