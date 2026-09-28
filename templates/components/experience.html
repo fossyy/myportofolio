@@ -3,9 +3,9 @@
         <span class="section-number">02</span>
         <h2 class="section-title">experience</h2>
 
-        <a href="{% url 'main:create_experience' %}" class="project-link project-link--source">
-            [ + add_experience ]
-        </a>
+        {% if is_portfolio_owner %}
+            <a href="{% url 'experiences:create' %}" class="project-link project-link--source">[ + add_experience ]</a>
+        {% endif %}
     </div>
 
     <div class="section-content">
@@ -19,20 +19,23 @@
                         <p class="record__organization">{{ experience.get_category_display }} · {% if experience.is_ongoing %}Ongoing{% else %}Completed{% endif %}</p>
                         <p class="record__description">{{ experience.description }}</p>
                         <p class="record__project">{{ experience.project }}</p>
+                        {% if can_edit_content %}
+                            <a class="project-link project-link--source" href="{% url 'experiences:update' experience.pk %}">[ edit_experience ]</a>
+                        {% endif %}
                         <div class="tag-list record__tags">
                             {% for tag in experience.tags %}
                                 <span class="tech-tag">{{ tag }}</span>
                             {% endfor %}
                         </div>
 
-                        <form method="post"
-                              action="{% url 'main:delete_experience' experience.pk %}"
+                        {% if is_portfolio_owner %}<form method="post"
+                              action="{% url 'experiences:delete' experience.pk %}"
                               class="project-row__delete-form">
                             {% csrf_token %}
                             <button type="submit" class="project-link project-link--source project-link--button">
                                 [ delete_experience ]
                             </button>
-                        </form>
+                        </form>{% endif %}
                     </div>
                 </article>
             {% empty %}

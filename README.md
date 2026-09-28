@@ -98,11 +98,19 @@ python manage.py test
 - Menambahkan endpoint GET untuk mengambil seluruh data experience, skills, dan education dalam format JSON (`b2ec191`).
 - Mempertahankan API projects yang sudah ada dan menambahkan route `/api/experience`, `/api/skills`, serta `/api/education` untuk melengkapi akses data tiap bagian portofolio.
 
+### Minggu 6 - Autentikasi, Otorisasi, dan Pemisahan Aplikasi (24–27 September 2026)
+
+- Menambahkan pembatasan akses berdasarkan peran editor dan superuser untuk melindungi pengelolaan konten (`66f6c6c`).
+- Memperbaiki perlindungan endpoint dan fitur project stars agar hanya dapat digunakan sesuai hak akses (`43719a8`).
+- Menambahkan form untuk memperbarui konten bagian portofolio (`da0bfa6`).
+- Memisahkan context dan kebijakan akses bersama agar dapat digunakan lintas bagian (`d324e3f`).
+- Memecah fitur portofolio menjadi aplikasi Django terpisah untuk education, experiences, projects, dan skills (`3d5fc94`).
+
 ## AI disclosure
 
 Saya menggunakan AI hanya pada Tugas Individu 1 dan Tugas Individu 2. Saya sendiri sebenarnya sudah mempunyai website portofolio di [fossy.my.id](https://fossy.my.id) dan mengambil sebagian besar desain dari sana. Pada website tersebut saya menggunakan Tailwind CSS, sedangkan pada tugas ini saya diminta menggunakan vanilla CSS, sehingga AI saya gunakan untuk membantu mengonversi beberapa syntax Tailwind CSS ke vanilla CSS. Saya memahami keterbatasan AI dalam proses critical thinking, jadi saya tidak menyerahkan seluruh codebase kepada AI dan tetap melakukan cherry pick dalam memilah output yang digunakan.
 
-Untuk Tugas Individu 3, saya tidak menggunakan AI. Seluruh implementasi pada tugas tersebut, termasuk form, pengelolaan konten, fitur API, serta dokumentasinya, dikerjakan secara mandiri.
+Untuk Tugas Individu 3 dan 4, saya tidak menggunakan AI. Seluruh implementasi dan dokumentasi pada kedua tugas tersebut dikerjakan secara mandiri.
 
 Pada Tugas Individu 1 dan 2, saya menggunakan AI harness (opencode) dengan model Qwen 3.7. History chat tersimpan pada perangkat saya dan tidak dapat saya bagikan. Sebagai transparansi, berikut contoh prompt yang saya gunakan:
 

@@ -3,9 +3,9 @@
         <span class="section-number">04</span>
         <h2 class="section-title">education</h2>
 
-        <a href="{% url 'main:create_education' %}" class="project-link project-link--source">
-            [ + add_education ]
-        </a>
+        {% if is_portfolio_owner %}
+            <a href="{% url 'education:create' %}" class="project-link project-link--source">[ + add_education ]</a>
+        {% endif %}
     </div>
     <div class="section-content">
         <div class="record-list">
@@ -15,15 +15,18 @@
                     <div class="record__body">
                         <h3 class="record__title">{{ education.qualification }}</h3>
                         <p class="record__organization">{{ education.institution }}</p>
+                        {% if can_edit_content %}
+                            <a class="project-link project-link--source" href="{% url 'education:update' education.pk %}">[ edit_education ]</a>
+                        {% endif %}
 
-                        <form method="post"
-                              action="{% url 'main:delete_education' education.pk %}"
+                        {% if is_portfolio_owner %}<form method="post"
+                              action="{% url 'education:delete' education.pk %}"
                               class="project-row__delete-form">
                             {% csrf_token %}
                             <button type="submit" class="project-link project-link--source project-link--button">
                                 [ delete_education ]
                             </button>
-                        </form>
+                        </form>{% endif %}
                     </div>
                 </article>
             {% empty %}

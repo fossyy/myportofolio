@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Add Experience - {{ name }}
+    {{ form_title }} - {{ name }}
 {% endblock title %}
 
 {% block content %}
@@ -9,12 +9,12 @@
     <section class="portfolio-section">
         <div class="section-heading">
             <span class="section-number">02.</span>
-            <h1 class="section-title">Add Experience</h1>
+            <h1 class="section-title">{{ form_title }}</h1>
         </div>
 
         <div class="section-content">
             <form method="post"
-                  action="{% url 'main:create_experience' %}"
+                  action="{{ form_action }}"
                   class="project-form">
                 {% csrf_token %}
 
@@ -37,10 +37,10 @@
                 <div class="project-form__actions">
                     <button type="submit" class="terminal-action">
                         <span class="terminal-action__prompt">$</span>
-                        tambah_experience
+                        {{ submit_label }}
                     </button>
 
-                    <a href="{% url 'main:show_experience' %}"
+                    <a href="{% url 'experiences:list' %}"
                        class="terminal-action">
                         <span class="terminal-action__prompt">$</span>
                         batal

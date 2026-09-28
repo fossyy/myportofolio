@@ -1,10 +1,11 @@
 from datetime import date
-import base64
+from django.contrib.auth import get_user_model
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
-from main.models import Experience, Project
+from experiences.models import Experience
+from projects.models import Project
 
 
 class MainTest(TestCase):
@@ -26,7 +27,7 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "index.html")
         self.assertContains(response, "Bagas Aulia Rezki")
         self.assertNotContains(response, self.experience.title)
-        self.assertContains(response, f'href="{reverse("main:show_experience")}"')
+        self.assertContains(response, f'href="{reverse("experiences:list")}"')
 
     def test_nonexistent_page_returns_404(self):
         response = self.client.get("/a-page-that-does-not-exist/")
@@ -41,7 +42,7 @@ class MainTest(TestCase):
         self.assertTrue(self.experience.is_ongoing)
 
     def test_experience_page(self):
-        response = self.client.get(reverse("main:show_experience"))
+        response = self.client.get(reverse("experiences:list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
@@ -55,7 +56,7 @@ class MainTest(TestCase):
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
-        response = self.client.get(reverse("main:show_experience"))
+        response = self.client.get(reverse("experiences:list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No experience has been added yet.")
@@ -63,7 +64,7 @@ class MainTest(TestCase):
     def test_completed_experience(self):
         self.experience.ended_at = date(2025, 4, 30)
         self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
+        response = self.client.get(reverse("experiences:list"))
 
         self.assertFalse(self.experience.is_ongoing)
         self.assertEqual(self.experience.period, "Aug 2024 — Apr 2025")
@@ -72,12 +73,8 @@ class MainTest(TestCase):
 
 
 class ProjectPageTest(TestCase):
-    def basic_auth_headers(self):
-        credentials = base64.b64encode(b"project-admin:project-password").decode()
-        return {"HTTP_AUTHORIZATION": f"Basic {credentials}"}
-
     def test_projects_url_uses_shared_templates(self):
-        response = self.client.get(reverse("main:show_projects"))
+        response = self.client.get(reverse("projects:list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "projects.html")
@@ -97,7 +94,7 @@ class ProjectPageTest(TestCase):
                 description="Helps students find campus facilities.",
             ),
         ]
-        response = self.client.get(reverse("main:show_projects"))
+        response = self.client.get(reverse("projects:list"))
 
         self.assertQuerySetEqual(response.context["project_list"], projects)
         for project in projects:
@@ -110,7 +107,7 @@ class ProjectPageTest(TestCase):
 
     def test_empty_projects_page(self):
         self.assertFalse(Project.objects.exists())
-        response = self.client.get(reverse("main:show_projects"))
+        response = self.client.get(reverse("projects:list"))
 
         self.assertContains(response, "No projects have been added yet.")
         self.assertNotContains(response, 'class="project-row"')
@@ -126,14 +123,14 @@ class ProjectPageTest(TestCase):
                 project.source_url = source_url
                 project.live_url = live_url
                 project.save()
-                response = self.client.get(reverse("main:show_projects"))
+                response = self.client.get(reverse("projects:list"))
                 self.assertContains(response, "[ inspect_source ]", count=int(bool(source_url)))
                 self.assertContains(response, "[ view_live ]", count=int(bool(live_url)))
                 self.assertNotContains(response, 'href=""')
 
     def test_project_text_is_escaped(self):
         Project.objects.create(title="<script>alert(1)</script>", description="<b>Plain text</b>")
-        response = self.client.get(reverse("main:show_projects"))
+        response = self.client.get(reverse("projects:list"))
 
         self.assertContains(response, "&lt;script&gt;alert(1)&lt;/script&gt;")
         self.assertContains(response, "&lt;b&gt;Plain text&lt;/b&gt;")
@@ -141,10 +138,10 @@ class ProjectPageTest(TestCase):
 
     def test_shared_navigation_and_homepage_removal(self):
         project = Project.objects.create(title="Only on projects page", description="Database content")
-        for route in ["main:show_main", "main:show_experience", "main:show_projects"]:
+        for route in ["main:show_main", "experiences:list", "projects:list"]:
             with self.subTest(route=route):
                 response = self.client.get(reverse(route))
-                self.assertContains(response, f'href="{reverse("main:show_projects")}"')
+                self.assertContains(response, f'href="{reverse("projects:list")}"')
                 self.assertTemplateUsed(response, "components/navbar.html")
                 self.assertTemplateUsed(response, "components/footer.html")
         home = self.client.get(reverse("main:show_main"))
@@ -155,7 +152,7 @@ class ProjectPageTest(TestCase):
         Project.objects.create(title="Research dashboard", description="Research")
         Project.objects.create(title="Campus directory", description="Campus")
 
-        response = self.client.get(reverse("main:projects_api"), {"title": "research"})
+        response = self.client.get(reverse("projects:api_list"), {"title": "research"})
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()[0]["fields"]["title"], "Research dashboard")
@@ -163,66 +160,77 @@ class ProjectPageTest(TestCase):
 
     def test_project_api_get_and_delete_by_title(self):
         project = Project.objects.create(title="Delete me", description="Temporary")
-        detail_url = reverse("main:project_api", args=[project.title])
+        detail_url = reverse("projects:api_detail", args=[project.title])
 
         response = self.client.get(detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()[0]["pk"], project.pk)
+        self.assertNotIn("starred_by", response.json()[0]["fields"])
 
-        with override_settings(
-            BASIC_AUTH_USERNAME="project-admin",
-            BASIC_AUTH_PASSWORD="project-password",
-        ):
-            response = self.client.delete(detail_url, **self.basic_auth_headers())
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Project.objects.filter(pk=project.pk).exists())
+
+        regular_user = get_user_model().objects.create_user(username="regular", password="pass")
+        self.client.force_login(regular_user)
+        response = self.client.delete(detail_url)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Project.objects.filter(pk=project.pk).exists())
+
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
+        response = self.client.delete(detail_url)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Project.objects.filter(pk=project.pk).exists())
 
-    @override_settings(
-        BASIC_AUTH_USERNAME="project-admin",
-        BASIC_AUTH_PASSWORD="project-password",
-    )
-    def test_project_mutations_require_basic_auth(self):
-        create_url = reverse("main:create_project")
+    def test_project_mutations_require_owner_access(self):
+        create_url = reverse("projects:create")
         delete_project = Project.objects.create(title="Protected project", description="Temporary")
-        delete_url = reverse("main:delete_project", args=[delete_project.pk])
+        delete_url = reverse("projects:delete", args=[delete_project.pk])
 
-        self.assertEqual(self.client.post(create_url, {}).status_code, 401)
-        self.assertEqual(self.client.post(delete_url).status_code, 401)
+        guest_response = self.client.post(create_url, {})
+        self.assertEqual(guest_response.status_code, 302)
+        self.assertIn(reverse("main:login"), guest_response.url)
+        self.assertEqual(self.client.post(delete_url).status_code, 302)
 
-        create_response = self.client.post(
-            create_url,
-            {
-                "title": "Authorized project",
-                "description": "Created with basic auth",
-            },
-            **self.basic_auth_headers(),
-        )
-        self.assertRedirects(create_response, reverse("main:show_projects"))
+        regular_user = get_user_model().objects.create_user(username="regular", password="pass")
+        self.client.force_login(regular_user)
+        self.assertEqual(self.client.post(create_url, {}).status_code, 403)
+        self.assertEqual(self.client.post(delete_url).status_code, 403)
+
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
+        create_response = self.client.post(create_url, {
+            "title": "Authorized project",
+            "description": "Created by the portfolio owner",
+        })
+        self.assertRedirects(create_response, reverse("projects:list"))
         self.assertTrue(Project.objects.filter(title="Authorized project").exists())
 
-        delete_response = self.client.post(delete_url, **self.basic_auth_headers())
-        self.assertRedirects(delete_response, reverse("main:show_projects"))
+        delete_response = self.client.post(delete_url)
+        self.assertRedirects(delete_response, reverse("projects:list"))
         self.assertFalse(Project.objects.filter(pk=delete_project.pk).exists())
 
     def test_projects_page_has_delete_button(self):
         project = Project.objects.create(title="Removable project", description="Temporary")
 
-        response = self.client.get(reverse("main:show_projects"))
+        response = self.client.get(reverse("projects:list"))
+        self.assertNotContains(response, f'action="{reverse("projects:delete", args=[project.pk])}"')
+        self.assertNotContains(response, "[ delete_project ]")
 
-        self.assertContains(response, f'action="{reverse("main:delete_project", args=[project.pk])}"')
+        self.client.force_login(get_user_model().objects.create_superuser(username="owner", password="pass"))
+        response = self.client.get(reverse("projects:list"))
+        self.assertContains(response, f'action="{reverse("projects:delete", args=[project.pk])}"')
         self.assertContains(response, "[ delete_project ]")
 
-    @override_settings(
-        BASIC_AUTH_USERNAME="project-admin",
-        BASIC_AUTH_PASSWORD="project-password",
-    )
     def test_delete_project_button_removes_project(self):
         project = Project.objects.create(title="Remove from page", description="Temporary")
+        owner = get_user_model().objects.create_superuser(username="owner", password="pass")
+        self.client.force_login(owner)
 
         response = self.client.post(
-            reverse("main:delete_project", args=[project.pk]),
-            **self.basic_auth_headers(),
+            reverse("projects:delete", args=[project.pk]),
         )
 
-        self.assertRedirects(response, reverse("main:show_projects"))
+        self.assertRedirects(response, reverse("projects:list"))
         self.assertFalse(Project.objects.filter(pk=project.pk).exists())
