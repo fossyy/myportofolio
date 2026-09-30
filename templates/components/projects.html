@@ -1,67 +1,39 @@
-<section class="portfolio-section" id="projects">
+{% load static %}
+<section class="portfolio-section" id="projects"
+         data-projects-endpoint="{% url 'projects:api_list' %}"
+         data-create-endpoint="{% url 'projects:create_ajax' %}"
+         data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
+         data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
+         data-delete-template="{% url 'projects:delete' 0 %}"
+         data-edit-template="{% url 'projects:update' 0 %}"
+         data-star-template="{% url 'projects:toggle_star' 0 %}">
     <div class="section-heading">
         <span class="section-number">03</span>
         <h2 class="section-title">selected projects</h2>
 
         {% if is_portfolio_owner %}
-            <a href="{% url 'projects:create' %}" class="project-link project-link--source">[ + add_project ]</a>
+            <button type="button" class="project-link project-link--source project-add-button"
+                    popovertarget="add-project-modal">[ + add_project ]</button>
         {% endif %}
     </div>
 
     <div class="section-content">
-        <div class="project-list">
-            {% for project in project_list %}
-                <article class="project-row">
-                    <div class="project-row__content">
-                        <p class="project-row__code">PRJ-{{ forloop.counter|stringformat:"02d" }}</p>
-                        <h3 class="project-row__title">{{ project.title }}</h3>
-                        <p class="project-row__description">{{ project.description }}</p>
-                    </div>
-
-                    <div class="project-row__links">
-                        {% if can_edit_content %}
-                            <a class="project-link project-link--source" href="{% url 'projects:update' project.pk %}">[ edit_project ]</a>
-                        {% endif %}
-                        <form method="post" action="{% url 'projects:toggle_star' project.pk %}" class="star-form">
-                            {% csrf_token %}
-                            <button type="submit" class="button-star{% if user in project.starred_by.all %} is-starred{% endif %}">
-                                ★ {% if user in project.starred_by.all %}Unstar{% else %}Star{% endif %}
-                                <span class="star-count">{{ project.starred_by.count }}</span>
-                            </button>
-                        </form>
-                        {% if project.source_url %}
-                            <a class="project-link project-link--source"
-                               href="{{ project.source_url }}"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                [ inspect_source ]
-                            </a>
-                        {% endif %}
-
-                        {% if project.live_url %}
-                            <a class="project-link project-link--live"
-                               href="{{ project.live_url }}"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                [ view_live ]
-                            </a>
-                        {% endif %}
-
-                        {% if is_portfolio_owner %}<form method="post"
-                              action="{% url 'projects:delete' project.pk %}"
-                              class="project-row__delete-form">
-                            {% csrf_token %}
-                            <button type="submit" class="project-link project-link--source project-link--button">
-                                [ delete_project ]
-                            </button>
-                        </form>{% endif %}
-                    </div>
-                </article>
-            {% empty %}
-                <p class="project-row__description">
-                    No projects have been added yet.
-                </p>
-            {% endfor %}
-        </div>
+        <form id="project-search-form" class="project-search" role="search">
+            <label class="visually-hidden" for="project-search-input">Search projects</label>
+            <input type="search" id="project-search-input" name="title"
+                   placeholder="Search by project name" class="project-search__input"
+                   aria-label="Search by project name">
+            <button type="submit" class="project-link">[ search ]</button>
+        </form>
+        <div id="projects-loading" class="project-row__description hide" role="status">Loading projects...</div>
+        <div id="projects-error" class="project-row__description hide" role="alert">Failed to load project data. Please try again.</div>
+        <div id="projects-empty" class="project-row__description hide">No projects have been added or found yet.</div>
+        <div id="projects-grid" class="project-list hide"></div>
     </div>
 </section>
+
+{% if is_portfolio_owner %}
+    {% include "components/project_form_modal.html" %}
+{% endif %}
+
+<script src="{% static 'js/projects.js' %}" defer></script>
