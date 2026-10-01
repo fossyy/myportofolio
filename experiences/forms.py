@@ -1,4 +1,5 @@
 from django.forms import DateInput, ModelForm, Select, TextInput, Textarea, URLInput
+from django.utils.html import strip_tags
 
 from experiences.models import Experience
 
@@ -32,3 +33,18 @@ class ExperienceForm(ModelForm):
             "started_at": DateInput(attrs={"type": "date"}),
             "ended_at": DateInput(attrs={"type": "date"}),
         }
+
+    def clean_title(self):
+        return strip_tags(self.cleaned_data["title"]).strip()
+
+    def clean_organization(self):
+        return strip_tags(self.cleaned_data["organization"]).strip()
+
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
+
+    def clean_project(self):
+        return strip_tags(self.cleaned_data["project"]).strip()
+
+    def clean_technologies(self):
+        return strip_tags(self.cleaned_data["technologies"]).strip()

@@ -1,6 +1,7 @@
 import uuid
 from datetime import date
 
+from django.conf import settings
 from django.db import models
 
 
@@ -24,6 +25,11 @@ class Experience(models.Model):
     thumbnail = models.URLField(blank=True, null=True)
     started_at = models.DateField(default=date.today)
     ended_at = models.DateField(blank=True, null=True)
+    starred_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="starred_experiences",
+        blank=True,
+    )
 
     class Meta:
         db_table = "main_experience"
