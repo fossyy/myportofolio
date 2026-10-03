@@ -1,46 +1,42 @@
-<section class="portfolio-section" id="experience">
+{% load static %}
+<section class="portfolio-section" id="experience"
+         data-list-endpoint="{% url 'experiences:api_list' %}"
+         data-login-url="{% url 'main:login' %}"
+         data-create-endpoint="{% url 'experiences:create_ajax' %}"
+         data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
+         data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+         data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
+         data-star-template="{% url 'experiences:toggle_star' '00000000-0000-0000-0000-000000000000' %}"
+         data-update-template="{% url 'experiences:update' '00000000-0000-0000-0000-000000000000' %}"
+         data-delete-template="{% url 'experiences:delete' '00000000-0000-0000-0000-000000000000' %}"
+         data-csrf-token="{{ csrf_token }}">
     <div class="section-heading">
         <span class="section-number">02</span>
         <h2 class="section-title">experience</h2>
-
         {% if is_portfolio_owner %}
-            <a href="{% url 'experiences:create' %}" class="project-link project-link--source">[ + add_experience ]</a>
+            <button type="button" class="project-link project-link--source project-add-button"
+                    popovertarget="add-experience-modal">[ + add_experience ]</button>
         {% endif %}
     </div>
 
     <div class="section-content">
-        <div class="record-list">
-            {% for experience in experience_list %}
-                <article class="record">
-                    <div class="record__meta">{{ experience.period }}</div>
-                    <div class="record__body">
-                        <h3 class="record__title">{{ experience.title }}</h3>
-                        <p class="record__organization">{{ experience.organization }}</p>
-                        <p class="record__organization">{{ experience.get_category_display }} · {% if experience.is_ongoing %}Ongoing{% else %}Completed{% endif %}</p>
-                        <p class="record__description">{{ experience.description }}</p>
-                        <p class="record__project">{{ experience.project }}</p>
-                        {% if can_edit_content %}
-                            <a class="project-link project-link--source" href="{% url 'experiences:update' experience.pk %}">[ edit_experience ]</a>
-                        {% endif %}
-                        <div class="tag-list record__tags">
-                            {% for tag in experience.tags %}
-                                <span class="tech-tag">{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-
-                        {% if is_portfolio_owner %}<form method="post"
-                              action="{% url 'experiences:delete' experience.pk %}"
-                              class="project-row__delete-form">
-                            {% csrf_token %}
-                            <button type="submit" class="project-link project-link--source project-link--button">
-                                [ delete_experience ]
-                            </button>
-                        </form>{% endif %}
-                    </div>
-                </article>
-            {% empty %}
-                <p class="record__description">No experience has been added yet.</p>
-            {% endfor %}
+        <form id="experience-search-form" class="project-search" role="search">
+            <label class="visually-hidden" for="experience-search-input">Search experience</label>
+            <input type="search" id="experience-search-input" name="title"
+                   placeholder="Search by role or title" class="project-search__input"
+                   aria-label="Search by experience title">
+            <button type="submit" class="project-link">[ search ]</button>
+        </form>
+        <p id="experience-loading" class="record__description" role="status">Loading experience...</p>
+        <div id="experience-error" class="record__description hide" role="alert">
+            Could not load experience. <button type="button" id="experience-retry" class="project-link">[ retry ]</button>
         </div>
+        <p id="experience-empty" class="record__description hide">No experience has been added or found.</p>
+        <div id="experience-grid" class="record-list hide"></div>
     </div>
 </section>
+
+{% if is_portfolio_owner %}
+    {% include "components/experience_form_modal.html" %}
+{% endif %}
+<script src="{% static 'js/experience.js' %}" defer></script>
