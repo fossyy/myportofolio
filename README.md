@@ -106,11 +106,17 @@ python manage.py test
 - Memisahkan context dan kebijakan akses bersama agar dapat digunakan lintas bagian (`d324e3f`).
 - Memecah fitur portofolio menjadi aplikasi Django terpisah untuk education, experiences, projects, dan skills (`3d5fc94`).
 
+### Minggu 7 - Pengembangan Experience dengan AJAX (4 Oktober 2026)
+
+- Menambahkan fitur star pada experience serta validasi untuk membersihkan teks form sebelum disimpan (`8cc71eb`).
+- Menambahkan endpoint JSON experience dengan dukungan pencarian (`6878786`).
+- Mengubah halaman experience agar data ditampilkan dan dikelola melalui AJAX, termasuk form modal (`d5881dc`).
+
 ## AI disclosure
 
 Saya menggunakan AI hanya pada Tugas Individu 1 dan Tugas Individu 2. Saya sendiri sebenarnya sudah mempunyai website portofolio di [fossy.my.id](https://fossy.my.id) dan mengambil sebagian besar desain dari sana. Pada website tersebut saya menggunakan Tailwind CSS, sedangkan pada tugas ini saya diminta menggunakan vanilla CSS, sehingga AI saya gunakan untuk membantu mengonversi beberapa syntax Tailwind CSS ke vanilla CSS. Saya memahami keterbatasan AI dalam proses critical thinking, jadi saya tidak menyerahkan seluruh codebase kepada AI dan tetap melakukan cherry pick dalam memilah output yang digunakan.
 
-Untuk Tugas Individu 3 dan 4, saya tidak menggunakan AI. Seluruh implementasi dan dokumentasi pada kedua tugas tersebut dikerjakan secara mandiri.
+Untuk Tugas Individu 3, 4, dan 5, saya tidak menggunakan AI. Seluruh implementasi dan dokumentasi pada ketiga tugas tersebut dikerjakan secara mandiri.
 
 Pada Tugas Individu 1 dan 2, saya menggunakan AI harness (opencode) dengan model Qwen 3.7. History chat tersimpan pada perangkat saya dan tidak dapat saya bagikan. Sebagai transparansi, berikut contoh prompt yang saya gunakan:
 
