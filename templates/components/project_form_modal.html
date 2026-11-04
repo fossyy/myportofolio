@@ -8,7 +8,7 @@
                 popovertarget="add-project-modal" popovertargetaction="hide"
                 aria-label="Close add project form">×</button>
         <h2 id="add-project-modal-title">Add a New Project</h2>
-        <form id="project-form" method="post" action="{% url 'projects:create_ajax' %}" class="project-form">
+        <form id="project-form" method="post" action="{% url 'projects:api_list' %}" class="project-form">
             {% csrf_token %}
             {% for field in form %}
                 <div class="project-form__field">

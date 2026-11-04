@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'skills.apps.SkillsConfig',
     'education.apps.EducationConfig',
     'main',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

@@ -1,12 +1,13 @@
 {% load static %}
 <section class="portfolio-section" id="projects"
          data-projects-endpoint="{% url 'projects:api_list' %}"
-         data-create-endpoint="{% url 'projects:create_ajax' %}"
          data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
          data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
-         data-delete-template="{% url 'projects:delete' 0 %}"
+         data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+         data-login-url="{% url 'main:login' %}"
          data-edit-template="{% url 'projects:update' 0 %}"
-         data-star-template="{% url 'projects:toggle_star' 0 %}">
+         data-api-detail-template="{% url 'projects:api_detail' 0 %}"
+         data-star-template="{% url 'projects:api_star' 0 %}">
     <div class="section-heading">
         <span class="section-number">03</span>
         <h2 class="section-title">selected projects</h2>
