@@ -1,21 +1,18 @@
 {% load static %}
 <section class="portfolio-section" id="experience"
-         data-list-endpoint="{% url 'experiences:api_list' %}"
+         data-list-endpoint="{% url 'api:experience_list' %}"
          data-login-url="{% url 'main:login' %}"
-         data-create-endpoint="{% url 'experiences:create_ajax' %}"
          data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
          data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
          data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
-         data-star-template="{% url 'experiences:toggle_star' '00000000-0000-0000-0000-000000000000' %}"
-         data-update-template="{% url 'experiences:update' '00000000-0000-0000-0000-000000000000' %}"
-         data-delete-template="{% url 'experiences:delete' '00000000-0000-0000-0000-000000000000' %}"
+         data-detail-template="{% url 'api:experience_detail' '00000000-0000-0000-0000-000000000000' %}"
+         data-star-template="{% url 'api:experience_star' '00000000-0000-0000-0000-000000000000' %}"
          data-csrf-token="{{ csrf_token }}">
     <div class="section-heading">
         <span class="section-number">02</span>
         <h2 class="section-title">experience</h2>
         {% if is_portfolio_owner %}
-            <button type="button" class="project-link project-link--source project-add-button"
-                    popovertarget="add-experience-modal">[ + add_experience ]</button>
+            <button type="button" class="project-link project-link--source project-add-button">[ + add_experience ]</button>
         {% endif %}
     </div>
 
@@ -36,7 +33,7 @@
     </div>
 </section>
 
-{% if is_portfolio_owner %}
+{% if can_edit_content %}
     {% include "components/experience_form_modal.html" %}
 {% endif %}
 <script src="{% static 'js/experience.js' %}" defer></script>

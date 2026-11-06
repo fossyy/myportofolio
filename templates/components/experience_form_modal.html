@@ -8,8 +8,7 @@
                 popovertarget="add-experience-modal" popovertargetaction="hide"
                 aria-label="Close add experience form">×</button>
         <h2 id="add-experience-modal-title">Add Experience</h2>
-        <form id="experience-form" method="post"
-              action="{% url 'experiences:create_ajax' %}" class="project-form">
+        <form id="experience-form" method="post" action="" class="project-form">
             {% csrf_token %}
             {% for field in form %}
                 <div class="project-form__field">
