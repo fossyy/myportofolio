@@ -170,7 +170,7 @@ class PortfolioRoleAccessTest(TestCase):
                     self.assertContains(response, 'data-can-edit="true"')
                     self.assertContains(
                         response,
-                        'data-update-template="/experience/00000000-0000-0000-0000-000000000000/edit/"',
+                        'data-detail-template="/api/v1/experiences/00000000-0000-0000-0000-000000000000/"',
                     )
                 else:
                     self.assertContains(response, edit_url)

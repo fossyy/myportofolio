@@ -3,15 +3,15 @@ from datetime import date
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.test import TestCase
 from django.urls import reverse
+from rest_framework.test import APITestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from experiences.models import Experience
 
 
-class ExperienceApiTests(TestCase):
+class ExperienceApiTests(APITestCase):
     def setUp(self):
         user_model = get_user_model()
         self.owner = user_model.objects.create_superuser(
@@ -37,7 +37,7 @@ class ExperienceApiTests(TestCase):
             "category": "full-time",
             "started_at": "2026-01-01",
         }
-        self.client = APIClient()
+        self.client = self.client_class()
 
     def test_public_list_detail_and_title_search(self):
         self.experience.starred_by.add(self.visitor)

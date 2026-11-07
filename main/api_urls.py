@@ -1,6 +1,6 @@
 from django.urls import path
 
-from experiences import api_views as experience_api_views
+from main import api_views as experience_api_views
 
 app_name = "api"
 

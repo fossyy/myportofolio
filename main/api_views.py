@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from experiences.models import Experience
-from experiences.serializers import ExperienceSerializer
+from main.serializers import ExperienceSerializer
 from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly
 
 
