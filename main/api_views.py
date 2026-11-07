@@ -10,10 +10,11 @@ from rest_framework.decorators import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from experiences.models import Experience
-from main.serializers import ExperienceSerializer
-from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly
 from skills.models import Skill
+
+from experiences.models import Experience
+from main.serializers import ExperienceSerializer, SkillSerializer
+from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly
 
 
 @api_view(["GET", "HEAD", "POST"])

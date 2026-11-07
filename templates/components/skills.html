@@ -1,41 +1,39 @@
-<section class="portfolio-section skills-section" id="skills">
+{% load static %}
+<section class="portfolio-section skills-section" id="skills"
+         data-list-endpoint="{% url 'api:skill_list' %}"
+         data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
+         data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+         data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
+         data-detail-template="{% url 'api:skill_detail' 0 %}"
+         data-star-template="{% url 'api:skill_star' 0 %}"
+         data-csrf-token="{{ csrf_token }}">
     <div class="section-watermark" aria-hidden="true">stack</div>
     <div class="section-heading">
         <span class="section-number">01</span>
         <h2 class="section-title">technical skills</h2>
 
         {% if is_portfolio_owner %}
-            <a href="{% url 'skills:create' %}" class="project-link project-link--source">[ + add_skill ]</a>
+            <button type="button" class="project-link project-link--source project-add-button">[ + add_skill ]</button>
         {% endif %}
     </div>
     <div class="section-content">
-        <div class="skills-groups">
-            {% regroup skill_list by category as skill_groups %}
-            {% for group in skill_groups %}
-                <div class="skills-group">
-                    <h3 class="skills-group__title">{{ group.grouper }}</h3>
-                    <div class="tag-list">
-                        {% for skill in group.list %}
-                            <div class="skill-tag">
-                                <span class="tech-tag">{{ skill.name }}</span>
-                                {% if can_edit_content %}
-                                    <a class="project-link project-link--source" href="{% url 'skills:update' skill.pk %}">[ edit ]</a>
-                                {% endif %}
-                                {% if is_portfolio_owner %}<form method="post"
-                                      action="{% url 'skills:delete' skill.pk %}"
-                                      class="skill-delete-form">
-                                    {% csrf_token %}
-                                    <button type="submit" class="project-link project-link--source project-link--button">
-                                        [ delete ]
-                                    </button>
-                                </form>{% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% empty %}
-                <p class="record__description">No skills have been added yet.</p>
-            {% endfor %}
+        <form id="skill-search-form" class="project-search" role="search">
+            <label class="visually-hidden" for="skill-search-input">Search skill</label>
+            <input type="search" id="skill-search-input" name="name"
+                   placeholder="Search by skill" class="project-search__input"
+                   aria-label="Search by skill name">
+            <button type="submit" class="project-link">[ search ]</button>
+        </form>
+        <p id="skill-loading" class="record__description" role="status">Loading skills...</p>
+        <div id="skill-error" class="record__description hide" role="alert">
+            Could not load skills. <button type="button" id="skill-retry" class="project-link">[ retry ]</button>
         </div>
+        <p id="skill-empty" class="record__description hide">No skills have been added yet.</p>
+        <div id="skills-groups" class="skills-groups hide"></div>
     </div>
 </section>
+
+{% if can_edit_content %}
+    {% include "components/skill_form_modal.html" %}
+{% endif %}
+<script src="{% static 'js/skills.js' %}" defer></script>
