@@ -1,6 +1,7 @@
 from django.utils.html import strip_tags
 from rest_framework import serializers
 
+from education.models import Education
 from experiences.models import Experience
 from skills.models import Skill
 
@@ -108,3 +109,48 @@ class SkillSerializer(StarSerializerMixin, serializers.ModelSerializer):
         if value is not None and value < 0:
             raise serializers.ValidationError("Position cannot be negative.")
         return value
+
+
+class EducationSerializer(StarSerializerMixin, serializers.ModelSerializer):
+    period = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Education
+        fields = [
+            "id",
+            "qualification",
+            "institution",
+            "start_year",
+            "end_year",
+            "period",
+            "star_count",
+            "is_starred",
+            "starred_by_names",
+        ]
+        read_only_fields = [
+            "id",
+            "period",
+            "star_count",
+            "is_starred",
+            "starred_by_names",
+        ]
+
+    def validate_qualification(self, value):
+        return _clean_required_text(
+            value, "Qualification can't contain only HTML tags."
+        )
+
+    def validate_institution(self, value):
+        return _clean_required_text(
+            value, "Institution can't contain only HTML tags."
+        )
+
+    def validate(self, attrs):
+        instance = self.instance
+        start_year = attrs.get("start_year", getattr(instance, "start_year", None))
+        end_year = attrs.get("end_year", getattr(instance, "end_year", None))
+        if start_year is not None and end_year is not None and end_year < start_year:
+            raise serializers.ValidationError(
+                {"end_year": "End year cannot precede start year."}
+            )
+        return attrs
