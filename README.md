@@ -112,6 +112,15 @@ python manage.py test
 - Menambahkan endpoint JSON experience dengan dukungan pencarian (`6878786`).
 - Mengubah halaman experience agar data ditampilkan dan dikelola melalui AJAX, termasuk form modal (`d5881dc`).
 
+### Minggu 8 - Migrasi Sections ke DRF API dan Frontend AJAX (6–9 November 2026)
+
+- Menambahkan `ExperienceSerializer` dengan field baca-saja untuk hasil perhitungan star serta validasi yang membersihkan markup dari input teks (`42176c2`).
+- Membuat endpoint API experience (`/api/v1/experiences/` dan detail berbasis UUID beserta aksi star), lalu memindahkan halaman experience agar memuat dan mengelola data melalui AJAX (`f6fdbd8`, `6facafc`).
+- Menambahkan pengujian API experience yang mencakup status code, validasi, izin akses per peran, dan proteksi CSRF (`eadbd67`), kemudian merapikan lokasi kode API ke aplikasi `main` (`1b78ba0`).
+- Menambahkan serializer serta endpoint API untuk skills dan education, termasuk field `starred_by` dan aksi star/toggle (`9e99f8a`, `bdfe2eb`).
+- Memigrasikan halaman skills dan education agar menggunakan endpoint `/api/v1/` (`0862d56`, `a01f842`), lalu menghapus view API lama serta helper serialisasi yang sudah digantikan oleh DRF (`a01f842`).
+- Menambahkan pengujian cakupan API untuk skills dan education (`2729900`, `e8f6d1c`).
+
 ## AI disclosure
 
 Saya menggunakan AI hanya pada Tugas Individu 1 dan Tugas Individu 2. Saya sendiri sebenarnya sudah mempunyai website portofolio di [fossy.my.id](https://fossy.my.id) dan mengambil sebagian besar desain dari sana. Pada website tersebut saya menggunakan Tailwind CSS, sedangkan pada tugas ini saya diminta menggunakan vanilla CSS, sehingga AI saya gunakan untuk membantu mengonversi beberapa syntax Tailwind CSS ke vanilla CSS. Saya memahami keterbatasan AI dalam proses critical thinking, jadi saya tidak menyerahkan seluruh codebase kepada AI dan tetap melakukan cherry pick dalam memilah output yang digunakan.
@@ -194,3 +203,27 @@ Pada Tugas Individu 1 dan 2, saya menggunakan AI harness (opencode) dengan model
    Ketika pengguna atau client membuka endpoint seperti `/api/experience`, Django mencocokkan URL tersebut melalui `main/urls.py` lalu memanggil `experience_api` pada `main/views.py`. View mengambil seluruh object `Experience` dari database menggunakan `Experience.objects.all()`. Object tersebut kemudian diserialisasi dengan `serializers.serialize("json", ...)` dan dikembalikan melalui `HttpResponse` dengan `content_type="application/json"`.
 
    Serialisasi diperlukan karena object model dan QuerySet Django bukan data JSON secara langsung. Proses ini mengubah data model menjadi representasi yang dapat dikirim melalui HTTP, termasuk primary key, nama model, dan nilai field dalam bentuk JSON. Client kemudian dapat membaca response tersebut untuk menampilkan atau memproses data tanpa menerima object Python yang hanya dapat digunakan di sisi server.
+
+## Refleksi Tutorial 7 dan Tugas Individu 6
+
+1. **REST dan Perbedaan PUT dengan PATCH**
+
+   REST (Representational State Transfer) adalah gaya arsitektur untuk sistem terdistribusi, bukan sekadar format data. Sebuah API disebut RESTful apabila mengikuti prinsip-prinsipnya: setiap sumber daya memiliki identitas berupa URI, interaksi dilakukan melalui metode HTTP yang bermakna (GET untuk membaca, POST untuk membuat, PUT untuk mengganti, PATCH untuk mengubah sebagian, DELETE untuk menghapus), server tidak menyimpan state permintaan di antara request (stateless), dan representasi sumber daya dapat dinegosiasikan. Mengembalikan JSON saja belum cukup, karena JSON hanyalah format representasi. Endpoint yang semuanya memakai POST dan dibedakan lewat nama aksi di URL, misalnya `/api/deleteExperience`, tetap mengembalikan JSON tetapi tidak RESTful karena tidak memanfaatkan semantik metode HTTP maupun identitas sumber daya.
+
+   PUT mengganti seluruh representasi sumber daya, sehingga client wajib mengirimkan semua field dan field yang tidak dikirim dianggap dikosongkan atau ditolak. PATCH hanya mengubah field yang dikirim dan membiarkan field lainnya apa adanya. Pada API experience ini, PUT dipakai ketika editor atau pemilik ingin mengganti seluruh data pengalaman sekaligus, sedangkan PATCH dipakai oleh modal edit di halaman experience yang hanya mengirim field yang berubah, misalnya sekadar memperbaiki judul.
+
+2. **Peran Serializer pada Django REST Framework**
+
+   Serializer menerjemahkan data antara object model dan representasi JSON di kedua arah: saat membaca, ia mengubah instance model menjadi data yang dikirim ke client; saat menulis, ia mem-parsing input, memvalidasinya, lalu menyimpannya ke model. Keuntungannya dibanding merakit dictionary secara manual dengan `JsonResponse` seperti pada Tutorial 05 adalah validasi, konversi tipe (misalnya tanggal dan pilihan kategori), serta daftar field yang ditulis eksplisit menjadi satu tempat yang terpusat dan teruji. Field hasil perhitungan seperti `star_count` dan `is_starred` dapat dinyatakan read-only sehingga tidak mungkin dipalsukan dari input, dan data sensitif seperti email atau hash password tidak ikut tampil karena tidak pernah dimasukkan ke daftar field. Dengan `JsonResponse` manual, semua pemeriksaan itu harus ditulis ulang di setiap view dan mudah terlewat.
+
+3. **Autentikasi, Otorisasi, dan Pemeriksaan di Server**
+
+   Autentikasi menjawab pertanyaan "siapa pengguna ini", misalnya melalui sesi login pada `SessionAuthentication`. Otorisasi menjawab "apa yang boleh dilakukan pengguna ini", dan pada DRF diperiksa oleh permission class seperti `IsPortfolioOwnerOrEditorOrReadOnly` dan `IsAuthenticated`. Keduanya berbeda: pengguna yang sudah terautentikasi tetap dapat ditolak otorisasinya, misalnya pengguna biasa yang mencoba menghapus data.
+
+   Hak akses wajib diperiksa di server karena menyembunyikan tombol di template hanya memengaruhi tampilan. Siapapun dapat mengirim permintaan PUT, PATCH, atau DELETE secara langsung ke endpoint, misalnya lewat browser lain atau alat seperti curl, tanpa pernah membuka halamannya. Permission class memastikan permintaan semacam itu ditolak dengan status 403 sebelum data berubah.
+
+4. **CSRF pada SessionAuthentication**
+
+   `SessionAuthentication` mengenali pengguna dari cookie sesi, dan browser mengirimkan cookie itu secara otomatis pada setiap permintaan ke domain yang sama, termasuk permintaan yang dibuat oleh situs lain tanpa sepengetahuan pengguna. Token CSRF memastikan permintaan yang mengubah data benar-benar berasal dari halaman aplikasi sendiri, bukan dari situs pihak ketiga yang memanfaatkan sesi yang masih aktif. Tanpa token yang valid, Django menolak permintaan tersebut.
+
+   Test yang memakai `force_authenticate` tidak cukup untuk membuktikan perlindungan CSRF, karena metode itu menempelkan pengguna langsung ke request tanpa melalui proses login maupun middleware CSRF, sehingga pemeriksaan CSRF dilewati. Pembuktiannya memerlukan client dengan `enforce_csrf_checks=True` yang masuk lewat `.login()`, lalu menunjukkan bahwa permintaan tanpa token ditolak sedangkan permintaan dengan token yang sama diterima.
