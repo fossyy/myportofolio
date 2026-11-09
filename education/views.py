@@ -1,19 +1,19 @@
 from django.contrib import messages
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods, require_POST
 
 from education.forms import EducationForm
 from education.models import Education
 from main.context import model_form_context, section_context
-from main.api import serialize_section
 from main.permissions import editor_required, owner_required
 
 
+@ensure_csrf_cookie
 def show_education(request):
     return render(request, "education.html", section_context(
-        request, education_list=Education.objects.all()
+        request, form=EducationForm()
     ))
 
 
@@ -51,13 +51,3 @@ def delete_education(request, education_id):
     education.delete()
     messages.success(request, "Education berhasil dihapus!")
     return redirect("education:list")
-
-
-@require_http_methods(["GET"])
-def education_api(request):
-    payload = serialize_section(
-        Education.objects.all(),
-        "education",
-        fields=["qualification", "institution", "start_year", "end_year"],
-    )
-    return HttpResponse(payload, content_type="application/json")

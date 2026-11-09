@@ -161,9 +161,6 @@ class PortfolioRoleAccessTest(TestCase):
         for section, page_url, edit_url in page_urls:
             with self.subTest(page_url=page_url):
                 response = self.client.get(page_url)
-                if section == "education":
-                    self.assertContains(response, edit_url)
-                    continue
                 self.assertContains(response, 'data-can-edit="true"')
                 if section == "project":
                     self.assertContains(response, f'data-edit-template="{reverse("projects:update", args=[0])}"')
@@ -174,5 +171,7 @@ class PortfolioRoleAccessTest(TestCase):
                     )
                 elif section == "skill":
                     self.assertContains(response, 'data-detail-template="/api/v1/skills/0/"')
+                elif section == "education":
+                    self.assertContains(response, 'data-detail-template="/api/v1/education/0/"')
                 else:
                     self.assertContains(response, edit_url)

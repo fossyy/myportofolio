@@ -1,37 +1,39 @@
-<section class="portfolio-section" id="education">
+{% load static %}
+<section class="portfolio-section" id="education"
+         data-list-endpoint="{% url 'api:education_list' %}"
+         data-login-url="{% url 'main:login' %}"
+         data-is-owner="{{ is_portfolio_owner|yesno:'true,false' }}"
+         data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+         data-can-edit="{{ can_edit_content|yesno:'true,false' }}"
+         data-detail-template="{% url 'api:education_detail' 0 %}"
+         data-star-template="{% url 'api:education_star' 0 %}"
+         data-csrf-token="{{ csrf_token }}">
     <div class="section-heading">
         <span class="section-number">04</span>
         <h2 class="section-title">education</h2>
 
         {% if is_portfolio_owner %}
-            <a href="{% url 'education:create' %}" class="project-link project-link--source">[ + add_education ]</a>
+            <button type="button" class="project-link project-link--source project-add-button">[ + add_education ]</button>
         {% endif %}
     </div>
     <div class="section-content">
-        <div class="record-list">
-            {% for education in education_list %}
-                <article class="record">
-                    <div class="record__meta">{{ education.period }}</div>
-                    <div class="record__body">
-                        <h3 class="record__title">{{ education.qualification }}</h3>
-                        <p class="record__organization">{{ education.institution }}</p>
-                        {% if can_edit_content %}
-                            <a class="project-link project-link--source" href="{% url 'education:update' education.pk %}">[ edit_education ]</a>
-                        {% endif %}
-
-                        {% if is_portfolio_owner %}<form method="post"
-                              action="{% url 'education:delete' education.pk %}"
-                              class="project-row__delete-form">
-                            {% csrf_token %}
-                            <button type="submit" class="project-link project-link--source project-link--button">
-                                [ delete_education ]
-                            </button>
-                        </form>{% endif %}
-                    </div>
-                </article>
-            {% empty %}
-                <p class="record__description">No education has been added yet.</p>
-            {% endfor %}
+        <form id="education-search-form" class="project-search" role="search">
+            <label class="visually-hidden" for="education-search-input">Search education</label>
+            <input type="search" id="education-search-input" name="qualification"
+                   placeholder="Search by qualification" class="project-search__input"
+                   aria-label="Search by qualification">
+            <button type="submit" class="project-link">[ search ]</button>
+        </form>
+        <p id="education-loading" class="record__description" role="status">Loading education...</p>
+        <div id="education-error" class="record__description hide" role="alert">
+            Could not load education. <button type="button" id="education-retry" class="project-link">[ retry ]</button>
         </div>
+        <p id="education-empty" class="record__description hide">No education has been added yet.</p>
+        <div id="education-grid" class="record-list hide"></div>
     </div>
 </section>
+
+{% if can_edit_content %}
+    {% include "components/education_form_modal.html" %}
+{% endif %}
+<script src="{% static 'js/education.js' %}" defer></script>
