@@ -3,7 +3,6 @@
     if (!section) return;
 
     const endpoint = section.dataset.listEndpoint;
-    const createEndpoint = section.dataset.createEndpoint;
     const isOwner = section.dataset.isOwner === "true";
     const canEdit = section.dataset.canEdit === "true";
     const isAuthenticated = section.dataset.isAuthenticated === "true";
@@ -14,8 +13,11 @@
     const searchForm = document.getElementById("experience-search-form");
     const searchInput = document.getElementById("experience-search-input");
     const form = document.getElementById("experience-form");
+    const modal = document.getElementById("add-experience-modal");
+    const modalTitle = document.getElementById("add-experience-modal-title");
     let debounceTimer;
     let requestController;
+    let editingId = null;
 
     function showState(state) {
         loading.classList.toggle("hide", state !== "loading");
@@ -48,25 +50,29 @@
         return getCookie("csrftoken") || section.dataset.csrfToken || "";
     }
 
-    function buildCard(item, index) {
-        const experience = item.fields;
-        const id = item.pk;
-        const updateUrl = itemUrl(section.dataset.updateTemplate, id);
-        const deleteUrl = itemUrl(section.dataset.deleteTemplate, id);
+    function errorMessages(result, fallback) {
+        if (result.detail) return [result.detail];
+        const messages = Object.values(result).flat().map((entry) => (
+            typeof entry === "string" ? entry : entry.message || JSON.stringify(entry)
+        ));
+        return messages.length ? messages : [fallback];
+    }
+
+    function buildCard(experience, index) {
+        const id = experience.id;
+        const detailUrl = itemUrl(section.dataset.detailTemplate, id);
         const starUrl = itemUrl(section.dataset.starTemplate, id);
         const tags = String(experience.technologies || "").split(",").map((tag) => tag.trim()).filter(Boolean);
-        const editLink = canEdit
-            ? `<a class="project-link project-link--source" href="${escapeHtml(updateUrl)}">[ edit_experience ]</a>`
+        const editButton = canEdit
+            ? `<button type="button" class="project-link project-link--source project-link--button experience-edit-button" data-detail-url="${escapeHtml(detailUrl)}">[ edit_experience ]</button>`
             : "";
         const deleteForm = isOwner
-            ? `<form method="post" action="${escapeHtml(deleteUrl)}" class="experience-delete-form">
-                   <input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken())}">
+            ? `<form method="post" action="${escapeHtml(detailUrl)}" class="experience-delete-form">
                    <button type="submit" class="project-link project-link--source project-link--button">[ delete_experience ]</button>
                </form>`
             : "";
         const starAction = isAuthenticated
             ? `<form method="post" action="${escapeHtml(starUrl)}" class="star-form experience-star-form">
-                   <input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken())}">
                    <button type="submit" class="button-star${experience.is_starred ? " is-starred" : ""}">
                        ★ ${experience.is_starred ? "Unstar" : "Star"} <span class="star-count">${escapeHtml(experience.star_count)}</span>
                    </button>
@@ -85,7 +91,7 @@
                 ${experience.project ? `<p class="record__project">${escapeHtml(experience.project)}</p>` : ""}
                 <div class="tag-list record__tags">${tags.map((tag) => `<span class="tech-tag">${escapeHtml(tag)}</span>`).join("")}</div>
                 <div class="experience-actions">
-                    ${editLink}
+                    ${editButton}
                     ${starAction}
                     ${deleteForm}
                 </div>
@@ -120,31 +126,69 @@
         }
     }
 
+    function openModal(mode) {
+        editingId = null;
+        modalTitle.textContent = mode === "edit" ? "Edit Experience" : "Add Experience";
+        form.querySelector('button[type="submit"]').textContent = mode === "edit"
+            ? "Save Changes"
+            : "Add Experience";
+        modal.showPopover();
+    }
+
+    async function startEdit(detailUrl) {
+        try {
+            const response = await fetch(detailUrl, { headers: { Accept: "application/json" } });
+            const experience = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                showToast("Could not load experience", errorMessages(experience, "Please try again.").join(" "), "error");
+                return;
+            }
+            form.reset();
+            Object.entries(experience).forEach(([name, value]) => {
+                const input = form.elements.namedItem(name);
+                if (input) input.value = value ?? "";
+            });
+            openModal("edit");
+            editingId = experience.id;
+        } catch (loadError) {
+            console.error("Could not load experience:", loadError);
+            showToast("Could not load experience", "Could not reach the server. Please try again.", "error");
+        }
+    }
+
     async function submitExperience(event) {
         event.preventDefault();
         const submitButton = form.querySelector('button[type="submit"]');
         submitButton.disabled = true;
+        const url = editingId ? itemUrl(section.dataset.detailTemplate, editingId) : endpoint;
         try {
-            const response = await fetch(createEndpoint, {
-                method: "POST",
-                headers: { "X-CSRFToken": csrfToken() },
-                body: new FormData(form),
+            const response = await fetch(url, {
+                method: editingId ? "PATCH" : "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken(),
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(Object.fromEntries(new FormData(form))),
             });
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
-                const messages = result.errors
-                    ? Object.values(result.errors).flat().map((entry) => entry.message)
-                    : [result.message || `Request failed (${response.status}).`];
-                showToast("Could not add experience", messages.join(" "), "error");
+                showToast(
+                    editingId ? "Could not update experience" : "Could not add experience",
+                    errorMessages(result, `Request failed (${response.status}).`).join(" "),
+                    "error",
+                );
                 return;
             }
+            const wasEditing = editingId !== null;
             form.reset();
-            document.getElementById("add-experience-modal")?.hidePopover();
-            showToast("Success", "Experience added successfully.", "success");
+            editingId = null;
+            modal?.hidePopover();
+            showToast("Success", wasEditing ? "Experience updated successfully." : "Experience added successfully.", "success");
             fetchExperience(searchInput.value.trim());
         } catch (submitError) {
-            console.error("Could not add experience:", submitError);
-            showToast("Could not add experience", "Could not reach the server. Please try again.", "error");
+            console.error("Could not save experience:", submitError);
+            showToast("Could not save experience", "Could not reach the server. Please try again.", "error");
         } finally {
             submitButton.disabled = false;
         }
@@ -158,17 +202,38 @@
             const response = await fetch(starForm.action, {
                 method: "POST",
                 headers: { "X-CSRFToken": csrfToken(), Accept: "application/json" },
-                body: new FormData(starForm),
             });
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
-                showToast("Could not update star", result.message || "Please log in to star this experience.", "error");
+                showToast("Could not update star", errorMessages(result, "Please log in to star this experience.").join(" "), "error");
                 return;
             }
             fetchExperience(searchInput.value.trim());
         } catch (starError) {
             console.error("Could not update star:", starError);
             showToast("Could not update star", "Could not reach the server. Please try again.", "error");
+        }
+    }
+
+    async function deleteExperience(event) {
+        const deleteForm = event.target.closest(".experience-delete-form");
+        if (!deleteForm) return;
+        event.preventDefault();
+        try {
+            const response = await fetch(deleteForm.action, {
+                method: "DELETE",
+                headers: { "X-CSRFToken": csrfToken(), Accept: "application/json" },
+            });
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({}));
+                showToast("Could not delete experience", errorMessages(result, `Request failed (${response.status}).`).join(" "), "error");
+                return;
+            }
+            showToast("Success", "Experience deleted successfully.", "success");
+            fetchExperience(searchInput.value.trim());
+        } catch (deleteError) {
+            console.error("Could not delete experience:", deleteError);
+            showToast("Could not delete experience", "Could not reach the server. Please try again.", "error");
         }
     }
 
@@ -184,7 +249,18 @@
     document.getElementById("experience-retry").addEventListener("click", () => {
         fetchExperience(searchInput.value.trim());
     });
-    grid.addEventListener("submit", toggleStar);
+    section.querySelector(".project-add-button")?.addEventListener("click", () => {
+        form.reset();
+        openModal("add");
+    });
+    grid.addEventListener("click", (event) => {
+        const editButton = event.target.closest(".experience-edit-button");
+        if (editButton) startEdit(editButton.dataset.detailUrl);
+    });
+    grid.addEventListener("submit", (event) => {
+        toggleStar(event);
+        deleteExperience(event);
+    });
     if (form) form.addEventListener("submit", submitExperience);
     fetchExperience();
 })();

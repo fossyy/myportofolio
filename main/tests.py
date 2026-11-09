@@ -48,7 +48,7 @@ class MainTest(TestCase):
         self.assertTemplateUsed(response, "experience.html")
         self.assertContains(response, 'id="experience-grid"')
         self.assertNotContains(response, self.experience.title)
-        payload = self.client.get(reverse("experiences:api_list")).json()[0]["fields"]
+        payload = self.client.get(reverse("api:experience_list")).json()[0]
         self.assertEqual(payload["title"], self.experience.title)
         self.assertEqual(payload["organization"], self.experience.organization)
         self.assertEqual(payload["description"], self.experience.description)
@@ -63,7 +63,7 @@ class MainTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="experience-empty"')
-        self.assertEqual(self.client.get(reverse("experiences:api_list")).json(), [])
+        self.assertEqual(self.client.get(reverse("api:experience_list")).json(), [])
 
     def test_completed_experience(self):
         self.experience.ended_at = date(2025, 4, 30)
@@ -72,7 +72,7 @@ class MainTest(TestCase):
 
         self.assertFalse(self.experience.is_ongoing)
         self.assertEqual(self.experience.period, "Aug 2024 — Apr 2025")
-        payload = self.client.get(reverse("experiences:api_list")).json()[0]["fields"]
+        payload = self.client.get(reverse("api:experience_list")).json()[0]
         self.assertEqual(payload["period"], "Aug 2024 — Apr 2025")
         self.assertFalse(payload["is_ongoing"])
         self.assertContains(response, 'id="experience-grid"')

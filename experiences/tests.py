@@ -24,32 +24,32 @@ class ExperienceAjaxTests(TestCase):
         self.experience.starred_by.add(self.regular)
 
         page = self.client.get(reverse("experiences:list"))
-        payload = self.client.get(reverse("experiences:api_list")).json()
+        payload = self.client.get(reverse("api:experience_list")).json()
 
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "experience-loading")
         self.assertNotContains(page, "Backend Developer")
-        self.assertEqual(payload[0]["fields"]["star_count"], 1)
-        self.assertFalse(payload[0]["fields"]["is_starred"])
+        self.assertEqual(payload[0]["star_count"], 1)
+        self.assertFalse(payload[0]["is_starred"])
 
         self.client.force_login(self.regular)
-        user_payload = self.client.get(reverse("experiences:api_list")).json()
-        self.assertTrue(user_payload[0]["fields"]["is_starred"])
+        user_payload = self.client.get(reverse("api:experience_list")).json()
+        self.assertTrue(user_payload[0]["is_starred"])
         for user in (self.editor, self.owner):
             self.client.force_login(user)
-            role_response = self.client.get(reverse("experiences:api_list"))
+            role_response = self.client.get(reverse("api:experience_list"))
             self.assertEqual(role_response.status_code, 200)
             self.assertEqual(len(role_response.json()), 1)
 
     def test_title_search_and_empty_results(self):
-        matching = self.client.get(reverse("experiences:api_list"), {"title": "backend"})
-        missing = self.client.get(reverse("experiences:api_list"), {"title": "designer"})
+        matching = self.client.get(reverse("api:experience_list"), {"title": "backend"})
+        missing = self.client.get(reverse("api:experience_list"), {"title": "designer"})
 
-        self.assertEqual([item["pk"] for item in matching.json()], [str(self.experience.pk)])
+        self.assertEqual([item["id"] for item in matching.json()], [str(self.experience.pk)])
         self.assertEqual(missing.json(), [])
 
     def test_only_owner_can_create_through_json_endpoint(self):
-        url = reverse("experiences:create_ajax")
+        url = reverse("api:experience_list")
         valid_data = {
             "title": "<b>New role</b>",
             "organization": "Studio",
@@ -58,44 +58,44 @@ class ExperienceAjaxTests(TestCase):
             "category": "full-time",
         }
 
-        self.assertEqual(self.client.post(url, valid_data).status_code, 403)
+        self.assertEqual(self.client.post(url, valid_data, format="json").status_code, 403)
         for user in (self.regular, self.editor):
             self.client.force_login(user)
-            self.assertEqual(self.client.post(url, valid_data).status_code, 403)
+            self.assertEqual(self.client.post(url, valid_data, format="json").status_code, 403)
 
         self.client.force_login(self.owner)
-        response = self.client.post(url, valid_data)
+        response = self.client.post(url, valid_data, format="json")
 
         self.assertEqual(response.status_code, 201)
-        created = Experience.objects.get(pk=response.json()["pk"])
+        created = Experience.objects.get(pk=response.json()["id"])
         self.assertEqual(created.title, "New role")
         self.assertEqual(created.description, "alert(1)Built something")
 
     def test_invalid_create_returns_json_field_errors(self):
         self.client.force_login(self.owner)
 
-        response = self.client.post(reverse("experiences:create_ajax"), {
+        response = self.client.post(reverse("api:experience_list"), {
             "title": "",
             "organization": "Studio",
             "description": "Description",
             "started_at": "not-a-date",
             "category": "full-time",
-        })
+        }, format="json")
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn("title", response.json()["errors"])
+        self.assertIn("title", response.json())
 
     def test_any_authenticated_role_can_toggle_star(self):
         response = self.client.post(reverse(
-            "experiences:toggle_star", args=[self.experience.pk]
+            "api:experience_star", args=[self.experience.pk]
         ))
         self.assertEqual(response.status_code, 403)
 
-        url = reverse("experiences:toggle_star", args=[self.experience.pk])
+        url = reverse("api:experience_star", args=[self.experience.pk])
         for user in (self.regular, self.editor, self.owner):
             self.client.force_login(user)
-            self.assertTrue(self.client.post(url).json()["starred"])
-            self.assertFalse(self.client.post(url).json()["starred"])
+            self.assertTrue(self.client.post(url).json()["is_starred"])
+            self.assertFalse(self.client.post(url).json()["is_starred"])
 
     def test_ajax_create_accepts_the_rendered_csrf_token(self):
         csrf_client = Client(enforce_csrf_checks=True)
@@ -104,7 +104,7 @@ class ExperienceAjaxTests(TestCase):
         csrf_token = re.search(r'data-csrf-token="([^"]+)"', page.content.decode()).group(1)
 
         response = csrf_client.post(
-            reverse("experiences:create_ajax"),
+            reverse("api:experience_list"),
             {
                 "title": "Secure request",
                 "organization": "Studio",
@@ -112,6 +112,7 @@ class ExperienceAjaxTests(TestCase):
                 "started_at": "2026-01-01",
                 "category": "full-time",
             },
+            content_type="application/json",
             HTTP_X_CSRFTOKEN=csrf_token,
         )
 

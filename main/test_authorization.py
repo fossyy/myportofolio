@@ -153,24 +153,25 @@ class PortfolioRoleAccessTest(TestCase):
         for section, page_url, edit_url in page_urls:
             with self.subTest(page_url=page_url):
                 response = self.client.get(page_url)
-                if section in ("project", "experience"):
+                if section != "education":
                     self.assertContains(response, 'data-can-edit="false"')
-                    self.assertNotContains(response, edit_url)
-                else:
-                    self.assertNotContains(response, edit_url)
+                self.assertNotContains(response, edit_url)
 
         self.client.force_login(self.editor())
         for section, page_url, edit_url in page_urls:
             with self.subTest(page_url=page_url):
                 response = self.client.get(page_url)
+                self.assertContains(response, 'data-can-edit="true"')
                 if section == "project":
-                    self.assertContains(response, 'data-can-edit="true"')
                     self.assertContains(response, f'data-edit-template="{reverse("projects:update", args=[0])}"')
                 elif section == "experience":
-                    self.assertContains(response, 'data-can-edit="true"')
                     self.assertContains(
                         response,
-                        'data-update-template="/experience/00000000-0000-0000-0000-000000000000/edit/"',
+                        'data-detail-template="/api/v1/experiences/00000000-0000-0000-0000-000000000000/"',
                     )
+                elif section == "skill":
+                    self.assertContains(response, 'data-detail-template="/api/v1/skills/0/"')
+                elif section == "education":
+                    self.assertContains(response, 'data-detail-template="/api/v1/education/0/"')
                 else:
                     self.assertContains(response, edit_url)

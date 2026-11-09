@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -13,6 +14,12 @@ class Education(models.Model):
         blank=True,
         null=True,
         validators=[MinValueValidator(1000), MaxValueValidator(9999)],
+    )
+    starred_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="starred_education",
+        blank=True,
+        db_table="main_education_starred_by",
     )
 
     class Meta:
