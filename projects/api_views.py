@@ -1,12 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils.html import strip_tags
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -16,7 +11,6 @@ from projects.serializers import ProjectSerializer
 
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def project_list(request):
     if request.method in ("GET", "HEAD"):
@@ -36,7 +30,6 @@ def project_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def project_detail(request, pk):
     project = get_object_or_404(Project.objects.prefetch_related("starred_by"), pk=pk)
@@ -60,7 +53,6 @@ def project_detail(request, pk):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def project_star(request, pk):
     project = get_object_or_404(Project.objects.prefetch_related("starred_by"), pk=pk)

@@ -58,7 +58,7 @@ class ExperienceAjaxTests(TestCase):
             "category": "full-time",
         }
 
-        self.assertEqual(self.client.post(url, valid_data, format="json").status_code, 403)
+        self.assertEqual(self.client.post(url, valid_data, format="json").status_code, 401)
         for user in (self.regular, self.editor):
             self.client.force_login(user)
             self.assertEqual(self.client.post(url, valid_data, format="json").status_code, 403)
@@ -89,7 +89,7 @@ class ExperienceAjaxTests(TestCase):
         response = self.client.post(reverse(
             "api:experience_star", args=[self.experience.pk]
         ))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 401)
 
         url = reverse("api:experience_star", args=[self.experience.pk])
         for user in (self.regular, self.editor, self.owner):

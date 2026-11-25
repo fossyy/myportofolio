@@ -34,7 +34,7 @@ class ProjectApiSecurityTest(TestCase):
         star_url = reverse("projects:api_star", args=[self.project.pk])
 
         guest_response = self.client.post(star_url)
-        self.assertEqual(guest_response.status_code, 403)
+        self.assertEqual(guest_response.status_code, 401)
         self.assertFalse(self.project.starred_by.exists())
 
         self.client.force_login(self.regular_user)

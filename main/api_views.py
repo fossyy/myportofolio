@@ -1,25 +1,26 @@
 from django.shortcuts import get_object_or_404
 from django.utils.html import strip_tags
 from rest_framework import status
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from skills.models import Skill
 from education.models import Education
-
 from experiences.models import Experience
-from main.serializers import ExperienceSerializer, SkillSerializer, EducationSerializer
 from main.permissions import IsPortfolioOwnerOrEditorOrReadOnly
+from main.serializers import EducationSerializer, ExperienceSerializer, SkillSerializer
+from skills.models import Skill
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    if request.auth is not None:
+        request.auth.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def experience_list(request):
     if request.method in ("GET", "HEAD"):
@@ -39,7 +40,6 @@ def experience_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def experience_detail(request, pk):
     experience = get_object_or_404(
@@ -65,7 +65,6 @@ def experience_detail(request, pk):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def experience_star(request, pk):
     experience = get_object_or_404(
@@ -81,7 +80,6 @@ def experience_star(request, pk):
 
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def skill_list(request):
     if request.method in ("GET", "HEAD"):
@@ -99,7 +97,6 @@ def skill_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def skill_detail(request, pk):
     skill = get_object_or_404(Skill.objects.prefetch_related("starred_by"), pk=pk)
@@ -123,7 +120,6 @@ def skill_detail(request, pk):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def skill_star(request, pk):
     skill = get_object_or_404(Skill.objects.prefetch_related("starred_by"), pk=pk)
@@ -137,7 +133,6 @@ def skill_star(request, pk):
 
 
 @api_view(["GET", "HEAD", "POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def education_list(request):
     if request.method in ("GET", "HEAD"):
@@ -159,7 +154,6 @@ def education_list(request):
 
 
 @api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
 def education_detail(request, pk):
     education = get_object_or_404(
@@ -185,7 +179,6 @@ def education_detail(request, pk):
 
 
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def education_star(request, pk):
     education = get_object_or_404(

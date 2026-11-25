@@ -155,7 +155,7 @@ class ProjectApiTests(TestCase):
 
     def test_guest_and_regular_user_cannot_manage_projects(self):
         guest_create = self.client.post(self.list_url, self.payload, format="json")
-        self.assertEqual(guest_create.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(guest_create.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.force_authenticate(user=self.visitor)
         created = self.client.post(self.list_url, self.payload, format="json")
@@ -169,7 +169,7 @@ class ProjectApiTests(TestCase):
 
     def test_star_requires_login_and_toggles(self):
         guest = self.client.post(self.star_url)
-        self.assertEqual(guest.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(guest.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.force_authenticate(user=self.visitor)
         first = self.client.post(self.star_url)
@@ -214,3 +214,38 @@ class ProjectApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_token_login_create_project_and_logout(self):
+        token_url = reverse("api:api_token_auth")
+        logout_url = reverse("api:api_logout")
+
+        login_response = self.client.post(
+            token_url,
+            {"username": "owner", "password": "test-password"},
+            format="json",
+        )
+        self.assertEqual(login_response.status_code, status.HTTP_200_OK)
+        token = login_response.data["token"]
+
+        auth_header = f"Token {token}"
+        create_response = self.client.post(
+            self.list_url,
+            self.payload,
+            format="json",
+            HTTP_AUTHORIZATION=auth_header,
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_201_CREATED)
+
+        logout_response = self.client.post(
+            logout_url,
+            HTTP_AUTHORIZATION=auth_header,
+        )
+        self.assertEqual(logout_response.status_code, status.HTTP_204_NO_CONTENT)
+
+        after_logout = self.client.post(
+            self.list_url,
+            self.payload,
+            format="json",
+            HTTP_AUTHORIZATION=auth_header,
+        )
+        self.assertEqual(after_logout.status_code, status.HTTP_401_UNAUTHORIZED)

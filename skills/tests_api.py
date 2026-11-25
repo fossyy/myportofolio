@@ -126,9 +126,9 @@ class SkillApiTests(APITestCase):
         guest_create = self.client.post(self.list_url, self.payload, format="json")
         guest_patch = self.client.patch(self.detail_url, {"name": "Guest update"}, format="json")
         guest_delete = self.client.delete(self.detail_url)
-        self.assertEqual(guest_create.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(guest_patch.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(guest_delete.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(guest_create.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(guest_patch.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(guest_delete.status_code, status.HTTP_401_UNAUTHORIZED)
 
         self.client.force_authenticate(user=self.visitor)
         created = self.client.post(self.list_url, self.payload, format="json")
@@ -143,7 +143,7 @@ class SkillApiTests(APITestCase):
 
     def test_star_requires_login_and_toggles(self):
         guest = self.client.post(self.star_url)
-        self.assertEqual(guest.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(guest.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(self.skill.starred_by.exists())
 
         self.client.force_authenticate(user=self.visitor)
